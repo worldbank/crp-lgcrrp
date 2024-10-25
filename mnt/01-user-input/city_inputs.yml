@@ -3,11 +3,3 @@ city_name: Cumilla
 AOI_shp_name: cumilla
 country_name: Bangladesh
 country_iso3: BGD
-
-# land surface temperature parameters
-first_year: 2014
-last_year: 2023
-
-# data sources (will override global_inputs if duplicates exist)
-# put False as default value if no data exists for a city
-flood_source: False

@@ -6,6 +6,10 @@ temperature_source: "cru"
 # GEE data output location
 drive_folder: 'LGCRRP'
 
+# land surface temperature parameters
+first_year: 2014
+last_year: 2023
+
 # flood analysis parameters
 flood:
   threshold: 15  # unit: cm
