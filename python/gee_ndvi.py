@@ -130,10 +130,10 @@ if menu['green']:
     ndvi_recentannual = s2a_med_RecentAnnual.normalizedDifference(['B8', 'B4']).rename('NDVI')
 
     # Export results to Google Cloud Storage bucket ------------------
-    task0 = ee.batch.Export.image.toCloudStorage(**{
+    task0 = ee.batch.Export.image.toDrive(**{
         'image': ndvi_Season,
         'description': f'{city_name_l}_NDVI_Season',
-        'bucket': global_inputs['cloud_bucket'],
+        'folder': global_inputs['drive_folder'],
         'region': AOI,
         'scale': 10,
         'maxPixels': 1e9,
@@ -145,10 +145,10 @@ if menu['green']:
     })
     task0.start()
 
-    task1 = ee.batch.Export.image.toCloudStorage(**{
+    task1 = ee.batch.Export.image.toDrive(**{
         'image': ndvi_recentannual,
         'description': f'{city_name_l}_NDVI_Annual',
-        'bucket': global_inputs['cloud_bucket'],
+        'folder': global_inputs['drive_folder'],
         'region': AOI,
         'scale': 10,
         'maxPixels': 1e9,

@@ -122,11 +122,10 @@ if menu['winter_lst']:
     # PROCESSING ###############################
     no_data_val = -9999
     collectionWinter = landsat.filter(rangefilter).filterBounds(AOI).map(maskL457sr).select('ST_B10').mean().add(-273.15).clip(AOI).unmask(value = no_data_val, sameFootprint = False)
-    task = ee.batch.Export.image.toCloudStorage(**{
+    task = ee.batch.Export.image.toDrive(**{
         'image': collectionWinter,
         'description': f"{city_name_l}_winter",
-        'bucket': global_inputs['cloud_bucket'],
-        # 'folder': city_inputs['country_name'],
+        'folder': global_inputs['drive_folder'],
         'region': AOI,
         'scale': 30,
         'maxPixels': 1e9,

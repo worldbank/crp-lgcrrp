@@ -63,10 +63,10 @@ if menu['nightlight']:
     sum_of_light = viirs_with_time.select(['system:time_start', 'avg_rad']).reduce(ee.Reducer.sum()).clip(AOI).unmask(value = no_data_val, sameFootprint = False)
 
     # Export results to Google Cloud Storage bucket ------------------
-    task0 = ee.batch.Export.image.toCloudStorage(**{
+    task0 = ee.batch.Export.image.toDrive(**{
         'image': linear_fit.select('scale'),
         'description': f'{city_name_l}_linfit',
-        'bucket': global_inputs['cloud_bucket'],
+        'folder': global_inputs['drive_folder'],
         'region': AOI,
         'scale': 100,
         'maxPixels': 1e9,
@@ -78,10 +78,10 @@ if menu['nightlight']:
     })
     task0.start()
 
-    task1 = ee.batch.Export.image.toCloudStorage(**{
+    task1 = ee.batch.Export.image.toDrive(**{
        'image': sum_of_light.select('avg_rad_sum'),
         'description': f'{city_name_l}_avg_rad_sum',
-        'bucket': global_inputs['cloud_bucket'],
+        'folder': global_inputs['drive_folder'],
         'region': AOI,
         'scale': 100,
         'maxPixels': 1e9,

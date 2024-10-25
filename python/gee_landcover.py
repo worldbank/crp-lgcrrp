@@ -95,15 +95,15 @@ if menu['landcover']:
     # Export results to Google Cloud Storage bucket ------------------
     no_data_val = -9999
     lc_aoi = lc_aoi.unmask(value = no_data_val, sameFootprint = False)
-    task0 = ee.batch.Export.image.toCloudStorage(**{'image': lc_aoi,
-                                                    'description': f'{city_name_l}_lc',
-                                                    'region': AOI,
-                                                    'scale': 10,
-                                                    'bucket': global_inputs['cloud_bucket'],
-                                                    'maxPixels': 1e9,
-                                                    'fileFormat': 'GeoTIFF',
-                                                    'formatOptions': {
-                                                        'cloudOptimized': True,
-                                                        'noData': no_data_val
-                                                    }})
+    task0 = ee.batch.Export.image.toDrive(**{'image': lc_aoi,
+                                             'description': f'{city_name_l}_lc',
+                                             'region': AOI,
+                                             'scale': 10,
+                                             'folder': global_inputs['drive_folder'],
+                                             'maxPixels': 1e9,
+                                             'fileFormat': 'GeoTIFF',
+                                             'formatOptions': {
+                                                 'cloudOptimized': True,
+                                                 'noData': no_data_val
+                                             }})
     task0.start()

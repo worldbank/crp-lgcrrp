@@ -48,15 +48,15 @@ if menu['elevation']:
     elevation_clip = elevation.clip(AOI).unmask(value = no_data_val, sameFootprint = False)
 
     # Export results to Google Cloud Storage bucket ------------------
-    task0 = ee.batch.Export.image.toCloudStorage(**{'image': elevation_clip,
-                                                    'description': f'{city_name_l}_elevation',
-                                                    'region': AOI,
-                                                    'scale': 30,
-                                                    'bucket': global_inputs['cloud_bucket'],
-                                                    'maxPixels': 1e9,
-                                                    'fileFormat': 'GeoTIFF',
-                                                    'formatOptions': {
-                                                        'cloudOptimized': True,
-                                                        'noData': no_data_val
-                                                    }})
+    task0 = ee.batch.Export.image.toDrive(**{'image': elevation_clip,
+                                             'description': f'{city_name_l}_elevation',
+                                             'region': AOI,
+                                             'scale': 30,
+                                             'folder': global_inputs['drive_folder'],
+                                             'maxPixels': 1e9,
+                                             'fileFormat': 'GeoTIFF',
+                                             'formatOptions': {
+                                                 'cloudOptimized': True,
+                                                 'noData': no_data_val
+                                             }})
     task0.start()

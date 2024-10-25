@@ -1,21 +1,9 @@
 # TODO: simplify this so that the user only needs to provide one file path where all data are stored
 # TODO: delete the unused ones
-solar_source: "D:/World Bank/CRP/data/Global Solar Atlas/World_PVOUT_GISdata_LTAy_AvgDailyTotals_GlobalSolarAtlas-v2_GEOTIFF/PVOUT.tif"
-solar_graph_source: "/Users/ipshitakarmakar/Dropbox (Personal)/WB/03-multi-scan-materials/Uzbekistan_GISdata_LTAy_YearlyMonthlyTotals_GlobalSolarAtlas-v2_GEOTIFF/monthly"
-air_source: "D:/World Bank/CRP/data/Global Annual PM2.5 Grids 1998-2019/sdei-global-annual-gwr-pm2-5-modis-misr-seawifs-aod-v4-gl-03-2019.tif"
-landslide_source: "D:/World Bank/CRP/data/Landslide susceptibility/global-landslide-susceptibility-map-2-27-23.tif"
-liquefaction_source: 'D:/World Bank/CRP/data/Liquefaction susceptibility/liquefaction_v1_deg.tif'
-flood_source: 'D:/World Bank/CRP/data/Fathom 3.0'
-rwi_source: 'D:/World Bank/CRP/data/Relative Wealth Index'
-burned_area_source: 'C:/Users/Owner/OneDrive/Documents/Career/World Bank/CRP/data/GlobFire'
-fwi_source: 'D:/World Bank/CRP/data/NASA FWI'
-lc_burn_source: "D:/World Bank/CRP/data/Landcover burnability/ESACCI.tif"
-temperature_source: "D:/World Bank/CRP/data/CRU/tmp"
-erosion_source: "D:/World Bank/CRP/data/Riverbank Erosion and Accretion from Landsat/REAL_nodes.csv"
-lightning_source: "D:/World Bank/CRP/data/Gridded Lightning Climatology/VHRFC_LIS_FRD.tif"
-water_salinity_source: "D:/World Bank/CRP/data/Water salinity"
-soil_salinity_source: 'D:/World Bank/CRP/data/Global Soil Salinity'
-elevation_source: "D:/World Bank/CRP/data/FABDEM"
+flood_source: 'fathom'
+
+# GEE data output location
+drive_folder: 'LGCRRP'
 
 # flood analysis parameters
 flood:
@@ -66,9 +54,19 @@ osm_query:
 fwi_first_year: 2016
 fwi_last_year: 2021
 
-# data sources
-data_bucket: 'city-scan-global-data'
-lc_burn_blob: 'ESACCI.tif'
-
-# data outputs
-cloud_bucket: 'gee-test-20231019'
+# other data sources (for potential future use)
+solar_source: ""
+solar_graph_source: ""
+air_source: ""
+landslide_source: ""
+liquefaction_source: ''
+rwi_source: ''
+burned_area_source: ''
+fwi_source: ''
+lc_burn_source: ""
+temperature_source: ""
+erosion_source: ""
+lightning_source: ""
+water_salinity_source: ""
+soil_salinity_source: ''
+elevation_source: ""
