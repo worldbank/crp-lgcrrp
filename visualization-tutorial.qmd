@@ -1,0 +1,521 @@
+---
+title: "CRP—LGCRRP Tutorial"
+format: html
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+# CRP---LGCRRP Tutorial
+
+Welcome to the CRP---LGCRRP visualizations tutorial!
+
+As you have already seen, creating all of the maps and charts only
+requires running `01-main.py` to process the data and `02-main.R` to
+visualize it. Here, though, we will briefly walk through what's
+happening under the hood so that you can understand what's going on and
+know where to make any changes.
+
+1.  Make a plot with `ggplot2`
+2.  Make a map with `ggplot2`
+3.  Why you don't need to know `ggplot2`
+4.  Making edits
+
+## Setup
+
+First, let's load all of the necessary packages using the file
+`R/setup.R`. This file is the first thing run by `02-main.R`. It loads
+the necessary packages and predefined functions, sets relevant directory
+paths, and defines variables that are used throughout the process.
+
+```{r}
+source("R/setup.R")
+```
+
+## Charts
+
+To make the plots, `02-main.R` calls `R/plots.R`, and this file in turn
+calls another file for each chart we are making. Each of these files
+make a plot with an R package called `ggplot2`. (The maps are also made
+with `ggplot2`, when `02-main.R` calls `R/maps.R`.)
+
+Let's begin with a simple plot of the urban built-up area over time.
+
+The data for this is already processed, and is located in the Cumilla's
+`02-process-output/tabular` folder.
+
+```{r}
+builtup <- read_csv(file = "mnt/city-directories/cumilla/02-process-output/tabular/cumilla_wsf_stats.csv")
+builtup
+```
+
+(In R, we define objects using a left arrow: `<-`.)
+
+This CSV contains two columns: the year, from 1985 to 2015, and the
+cumulative built-up area of the city.
+
+All `ggplot2` plots begin with a call of the `ggplot()` function. (Note
+that there is no "2" in the function name.) Typically, we define the
+data inside this function call. We then add (with literal `+`) geometry
+functions, which define the variables we want to plot. In this case, `x`
+is `year` and y is `cumulative sq km`.
+
+```{r}
+ggplot(data = builtup) +
+  geom_point(aes(x = year, y = `cumulative sq km`))
+  # Note the ` ` around `cumulative sq km`. This is because there are spaces in
+  # the variable name, so we need to tell ggplot all of these words go together
+```
+
+Above, the geometry function is `geom_point()`; we could alternatively
+make a line chart by using `geom_line()`. Other options include
+`geom_step()` and `geom_col()`, but there are many more.
+
+```{r}
+p <- ggplot(data = builtup) +
+  geom_line(aes(x = year, y = `cumulative sq km`))
+p
+```
+
+We can then start to modify this further, such as changing the labels,
+background color, and where the axes begin:
+
+```{r}
+builtup_plot <- p + # Note how we defined p in the previous chunk, and are now adding to it
+  labs( # Change the labels with labs()
+    title = "Urban expansion of Cumilla, 1985-2015",
+    x = "Year",
+    y = "Urban extent, square km.") +
+  scale_y_continuous(
+    limits = c(0, NA), # Sets y's lower limit but does not constrain y's upper limit
+    expand = expansion(c(0, 0.05)) # How much to expand the axis beyond the limits
+    # Also, in R, c() creates a vector of its contents
+  ) +
+  theme( # Use theme to change aesthetics unrelated to the data
+    axis.line = element_line(linewidth = .5, color = "black"),
+    panel.background = element_rect(color = NA, fill = "white"),
+    panel.grid.major = element_line(color = "lightgrey", linewidth = 0.2)
+  )
+builtup_plot
+```
+
+We can then save this plot using `ggsave()`, which gives us options for
+filetype (say, PNG or PDF), and plot dimensions. To make a 16 cm x 10 cm
+PNG, we'd do the following.
+
+```{r}
+ggsave(
+  filename = "mnt/city-directories/cumilla/03-render-output/charts/urban-expansion-tutorial.png",
+  plot = builtup_plot,
+  width = 15,
+  height = 10,
+  units = "cm",
+  dpi = 300 # This sets the resolution in "dots per inch"
+)
+```
+
+We can slightly simplify this by using `charts_dir` (a string predefined
+in `R/setup.R`) and `file.path()` (a function which combines strings
+into a file path).
+
+```{r}
+charts_dir
+file.path(charts_dir, "urban-expansion-tutorial.png")
+```
+
+```{r}
+ggsave(
+  filename = file.path(charts_dir, "urban-expansion-tutorial.png"),
+  plot = builtup_plot,
+  width = 15,
+  height = 10,
+  units = "cm",
+  dpi = 300 # This sets the resolution in "dots per inch"
+)
+```
+
+This is, more or less, the process by which all of the plots are made.
+The file `02-main.R` runs a file named `R/plots.R`, which in turn runs a
+series of R files which each create a data-specific plot or two, using
+similar steps to the above. Some of the files are more complicated, such
+as the CCKP plot scripts, which read data from Google Cloud, but this is
+the underlying logic. You can modify the plots by changing these files.
+
+#### Takeaways
+
+About the repository - You can modify plots by changing the file that
+writes them (e.g., `R/urban-extent.R`) - Doing so will change the plots
+for all future versions of that plot - `R/setup.R` has already defined
+the path to the charts directory, `charts_dir`, as well as to other
+repository directories
+
+About R & ggplot2 - To change plot dimensions, change the `width` and
+`height` arguments in `ggsave()` in the relevant file - To change
+labels, edit the contents of the `labs()` function - `<-` defines
+objects in R - In `ggplot2`, plots begin with `ggplot()` and then
+additional items are added with `+` - Data components are added with
+geoms, like `geom_point()` and `geom_line()` - Axes and color scales are
+modified with scales, like `scale_y_continuous()` or
+`scale_x_discrete()`, or `scale_color_manual()` - Use `theme()` to
+change non-data aesthetics
+
+About CCKP maps - For the CCKP data, we make two plots for each
+variable. One shows the median projections for 3 scenarios (SSP1-2.6,
+SSP2-4.5 and SSP3-7.0), while the other shows the median, 10th and 90th
+percentiles for SSP3-7.0. To change which SSP is used for the individual
+plot, change `selected_ssp` in `R/setup.R` on line 82.
+
+## Maps
+
+### Spatial ggplot2
+
+Maps are also made in `ggplot2`, but there are a few more specific steps
+to account for the spatial complexity.
+
+Let's begin, though, by reading in the data, using the terra package's
+`rast()` function, which reads raster files. For vector data, we'd use
+`vect()`.
+
+```{r}
+rast(file.path(spatial_dir, "cumilla_population.tif"))
+```
+
+Just as `charts_dir` holds the path to the charts directory (and
+`styled_maps_dir` holds the path to the output maps directory),
+`spatial_dir` contains the path to where all of the spatial files
+reside.
+
+We can further simplify this, by using the pre-defined function
+`fuzzy_read()`, which let's us use just part of the file name (so we can
+exclude the city name, which, obviously, changes for each city).
+`fuzzy_read()` also determines whether the file is a raster file
+(GeoTIFF only), or a vector file.
+
+This population file is already in the coordinate reference system EPSG
+4326, but to ensure it is, we still project it into it. (Note that the
+pipe `%>%` passes whats on the left into the function on the right as
+its first argument.)
+
+```{r}
+pop <- fuzzy_read(dir = spatial_dir, "population") %>% project(y = "epsg:4326")
+
+pop
+```
+
+For raster files, we plot with `ggplot` using `geom_spatraster()`; for
+vectors, we use `geom_spatvector()`.
+
+```{r}
+ggplot() +
+  geom_spatraster(data = pop)
+  # Note that for maps, data is defined in geom_spatraster() or geom_spatvector()
+  # rather than in ggplot()
+```
+
+Here we have our first map!
+
+Now let's change the colors, and stop showing the NA data. We can also
+change the legend label with `labs()` and add in the AOI boundary.
+
+```{r}
+aoi <- vect(file.path(user_input_dir, "AOI"))
+ggplot() +
+  geom_spatraster(data = pop) +
+  scale_fill_stepsn(
+    colors = c("#ECEB72", "#D6BE62", "#BF9152", "#A76642", "#8E3933"),
+    na.value = "transparent"
+  ) +
+  labs(fill = "Population density") +
+  geom_spatvector(data = aoi, color = "black", fill = NA)
+```
+
+To put everything in context, we add in a base map of raster tiles. The
+first time `annotation_map_tile()` is run for a city and zoom level, it
+downloads the tiles from the internet and make take a few moments.
+
+While the data is in CRS 4326, the tiles are in CRS 3867, or Web
+Mercator. To use the tiles we need to change the projection of the map.
+Because the data is in 4326, it is typically safer to define this
+projection *after* the data has been included (even though the tiles are
+added earlier).
+
+```{r}
+tiles <- annotation_map_tile(type = "cartolight", zoom = 15, progress = "none")
+ggplot() +
+  tiles +
+  geom_spatraster(data = pop) +
+  scale_fill_stepsn(
+    colors = c("#ECEB72", "#D6BE62", "#BF9152", "#A76642", "#8E3933"),
+    na.value = "transparent"
+  ) +
+  labs(fill = "Population density") +
+  geom_spatvector(data = aoi, color = "black", fill = NA) +
+  coord_sf(crs = "epsg:3857")
+```
+
+To finish, let's add a scale bar, north arrow, and adjust some of the
+theme styling:
+
+```{r}
+tiles <- annotation_map_tile(type = "cartolight", zoom = 15, progress = "none")
+ggplot() +
+  tiles +
+  geom_spatraster(data = pop) +
+  scale_fill_stepsn(
+    colors = c("#ECEB72", "#D6BE62", "#BF9152", "#A76642", "#8E3933"),
+    na.value = "transparent"
+  ) +
+  labs(fill = "Population density") +
+  geom_spatvector(data = aoi, color = "black", fill = NA) +
+  coord_sf(crs = "epsg:3857") +
+  theme(
+    legend.justification = c("left", "bottom"),
+    axis.text = element_blank(),
+    axis.ticks = element_blank()
+  ) +
+  annotation_north_arrow(style = north_arrow_minimal, location = "br", height = unit(1, "cm")) +
+  annotation_scale(style = "ticks", aes(unit_category = "metric", width_hint = 0.33), height = unit(0.25, "cm"))
+```
+
+#### Takeaways
+
+1.  Just like we use `geom_point()` and `geom_line()` for the charts, we
+    use `geom_spatraster()` and `geom_spatvector()` for spatial data
+2.  For `geom_spatraster()` and `geom_spatvector()`, `data` must be
+    defined within them and not in `ggplot()`
+3.  Add basemap tiles with
+    `annotation_map_tile(type = "cartolight", zoom = 15, progress = "none")`;
+    these need to be added before the other data layers (otherwise it
+    will cover them)
+4.  If we are using these tiles, it is especially important to set the
+    map CRS to Web Mercator: `coord_sf(crs = "epsg:3857")`
+5.  Change the CRS of data with `project(<data>, "epsg:4326")`
+6.  To add north arrows and scale bars, use `annotation_north_arrow()`
+    and `annotation_scale()`
+
+Prompt: Try mapping the built-up area. The file is
+
+```{r}
+file.path(spatial_dir, "cumilla_wsf_4326.tif")
+```
+
+### Using `plot_layer()` and layers.yml
+
+To handle more situations, and so that we don't need to build up the
+commands for each plot every time, we have a custom function
+`plot_layer()`. To do so we need to set some universal variables. These
+are all defined in the top of `R/maps.R`:
+
+```{r}
+# Set static map visualization parameters
+layer_alpha <- 0.7
+map_width <- 6.9 # width of map (excluding legend) in inches
+map_height <- 5.9 # height of map in inches
+aspect_ratio <- map_width / map_height
+
+# Define map extent and zoom level
+static_map_bounds <- aspect_buffer(aoi, aspect_ratio, buffer_percent = 0.05)
+  # static_map_bounds makes sure all maps for all cities have the same dimensions
+zoom <- round(15.6 + -0.00015 * (sqrt(expanse(aoi))))
+tiles <- annotation_map_tile(type = "cartolight", zoom = zoom, progress = "none")
+```
+
+You can change the dimensions of all maps by changing `map_width` and
+`map_height`.
+
+To plot the AOI, we just need to set `aoi_only = TRUE` and
+`plot_aoi = TRUE`. (We can also include ward lines, if we have data for
+these, by replacing `plot_aoi = TRUE` with `plot_wards = TRUE`. We can
+follow up on how to include wards later.)
+
+```{r}
+plot_layer(aoi_only = TRUE, plot_aoi = TRUE)
+```
+
+To make the population map, we just need to provide the data and the key
+"population".
+
+```{r}
+plot_layer(data = pop, yaml_key = "population")
+```
+
+What's going on here? `plot_layer()` finds parameters for how to style
+the data in `source/layers.yml`, where there is a *dictionary* for
+population called "population". It looks like this:
+
+```         
+population:
+  fuzzy_string: population.*.tif$
+  title: 'Population density'
+  subtitle: 'Number of persons per 10,000 m^2^'
+  palette: ['#ECEB72', '#8E3933']
+  bins: 5
+```
+
+and tells `plot_layer()` to make a color gradient from yellow to brown
+with 5 bins and to use "Population density\nNumber of persons per 10,000
+m^2^" as the title. By changing these values, we can change how the
+population map is plotted.
+
+We can do the same for built-up extent, which uses the YAML key "wsf"
+for World Settlement Footprint.
+
+```{r}
+# layer.yml also contains a string to use for reading the relevant file in the spatial directory
+wsf_data <- fuzzy_read(spatial_dir, fuzzy_string = layer_params$wsf$fuzzy_string)
+plot_layer(data = wsf_data, yaml_key = "wsf")
+```
+
+The YAML dictionary for this looks like
+
+```         
+wsf:
+  fuzzy_string: wsf_4326.tif$
+  title: 'Year of urban expansion'
+  breaks:  [1985,           1986,        1996,        2006,       2015]
+  labels:  ['Before 1986', '1986-1995', '1996-2005', '2006-2015']
+  palette: ['#FBF9CD',     '#E3B854',   '#BF4A3B',   '#25110B']
+```
+
+Here, we implicitly state the number of bins as 4 with the number of
+labels, and we assign a color to each label. The breaks tell `ggplot`
+how to divide up the data. Note that we have one more break than label,
+because we need to include a closing break (2015). (When the data is
+non-continuous, the number of labels and breaks will match. In this
+case, the breaks don't divide the data but say which discrete value
+should associate with each label.)
+
+### R/maps.R
+
+With these details defined in `layers.yml`, we can loop through all of
+the layers for which we have data. That's what this bit of R/maps.R is
+doing.
+
+```{r, eval = FALSE}
+# Create an empty list for the plots to be saved to
+plots <- list()
+
+# Take all of layer names from layer_params as well as the fuzzy file names
+unlist(lapply(layer_params, \(x) x$fuzzy_string)) %>%
+  # Loop through the fuzzy file names and the layer names
+  map2(names(.), \(fuzzy_string, yaml_key) {
+    tryCatch({
+      # For each file and layer name, read the data and make the plot
+      data <- fuzzy_read(spatial_dir, fuzzy_string) %>% vectorize_if_coarse()
+      plot <- plot_layer(
+        data = data, yaml_key = yaml_key,
+        plot_aoi = is.null(wards), plot_wards = !is.null(wards))
+      # Save the plot the the plots list
+      plots[[yaml_key]] <<- plot
+      message(paste("Success:", yaml_key))
+    },
+    # If there's an error, move on to the next layer!
+    error = \(e) warning(glue("Error on {yaml_key}: {e}")))
+  })
+```
+
+Most of the plots are made this way, but a few require a little more
+work.
+
+1.  Some of the maps require a final bit of pre-processing. This is done
+    with `source("R/pre-mapping.R")`.
+2.  Some maps require multiple layers, such a flooding probability on
+    top of population. For this we set `baseplot` to the desired lower
+    layer in `plot_layer()`.
+
+```{r}
+# Create empty list to hold all of the maps
+plots <- list()
+
+# Save population plot to the list
+plots$population <- plot_layer(data = pop, yaml_key = "population")
+plots$population
+
+fluvial <- fuzzy_read(spatial_dir, "fluvial_2020.tif$")
+
+plot_layer(data = fluvial, yaml_key = "fluvial")
+
+fluvial <- fuzzy_read(spatial_dir, "fluvial_2020.tif$")
+plot_layer(data = fluvial, yaml_key = "fluvial", baseplot = plots$population)
+```
+
+While there are more steps hidden inside `plot_layer()`, this is
+essentially just adding another `geom_spatraster()` on top of the first,
+as in the following:
+
+```{r}
+ggplot() +
+  geom_spatraster(data = pop) +
+  scale_fill_stepsn(
+    colors = layer_params$population$palette,
+    na.value = "transparent"
+  ) +
+  labs(fill = "Population density") +
+  ggnewscale::new_scale_fill() +
+  geom_spatraster(data = fluvial) +
+    scale_fill_stepsn(
+    colors = layer_params$fluvial$palette,
+    na.value = "transparent"
+  ) +
+  geom_spatvector(data = aoi, color = "black", fill = NA)
+```
+
+In `R/maps.R` the multi-layering of flood maps happens by sourcing
+`R/map-flooding.R`.
+
+Finally, with all the maps saved to the `plots` list, we save all of the
+plots
+
+```{r}
+# Save plots -------------------------------------------------------------------
+plots %>% walk2(names(.), \(plot, name) {
+  save_plot(plot, filename = glue("{name}.png"), directory = styled_maps_dir)
+})
+```
+
+There's a lot that's confusing in this (see `%>%`, `walk2`, `.`), but
+essentially it's doing the following for each map in `plots`:
+
+```{r}
+save_plot(plots$population, filename = "population-tutorial.png", directory = styled_maps_dir)
+```
+
+We could also use `ggsave()` like we did for the charts, but
+`save_plot()` is a custom function that ensures the legend is the same
+width for all maps. (The default legend width is 1/3 of the map width:
+that is the map is 3 parts wide and the legend is 1 part wide. You can
+change this by adding `rel_widths = c(X, Y)` to `save_plot()` but note
+this hasn't been thoroughly tested; the title line length does not
+automatically adapt.)
+
+```{r}
+save_plot(
+  plots$population, filename = "population-tutorial-new-width.png", directory = styled_maps_dir,
+  rel_widths = c(5, 1))
+```
+
+#### Takeaways
+
+Ways to modify maps 1. Edit colors, break points, and titles in
+`source/layers.yml`. 2. Save as PDFs rather than PNGs by changing "png"
+in the `save_plot()` call. 3. Stack layers by using `baseplot` in
+`plot_layer()`. 4. Change map dimensions by changing the `map_width` and
+`map_height` at the top of `R/maps.R`. This might be helpful for cities
+with very wide or tall AOIs. If doing so, it is important to run the
+lines defining `aspect_ratio`, `static_map_bounds`, `zoom` and `tiles`
+(and easiest to just run all or `R/maps.R`. 5. To some degree, you can
+edit an existing map (e.g., `plots$population`) by adding ggplot
+functions to override those already included. (This will not work as
+well on multi-layer maps.)
+
+Process 1. Final pre-processing happens in `R/pre-mapping.R` 2.
+`R/maps.R` uses custom functions defined in `R/fns.R` 3. Most maps are
+made by iterating through all of the layers in `source/layers.yml` 4. We
+use `save_plot()` instead of `ggsave()` so that all maps have the same
+legend width
+
+### Prompts
+
+1.  Try to modify the WSF map by showing only 3 bins instead and using
+    different colors.
+2.  Layer roads on top of the built-up area map

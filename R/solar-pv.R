@@ -1,23 +1,22 @@
 # Plotting solar availability seasonality line chart
-pv_path <- file.path(spatial_dir, "Bangladesh_GISdata_LTAy_YearlyMonthlyTotals_GlobalSolarAtlas-v2_AAIGRID/monthly")
 
-files <- list.files(pv_path) %>% 
-  subset(stringr::str_detect(., ".tif$|.asc$"))
-if (length(files) == 0) stop("No PV files found")
-monthly_pv <- lapply(files, function(f) {
-  m <- f %>% substr(7, 8) %>% as.numeric()
-  month_country <- terra::rast(file.path(pv_path, f))
-  month <- terra::extract(month_country, aoi, include_area = T) %>% .[[2]]
-  max <- max(month, na.rm = T)
-  min <- min(month, na.rm = T)
-  mean <- mean(month, na.rm = T)
-  sum <- sum(month, na.rm = T)
-  return(c(month = m, max = max, min = min, mean = mean, sum = sum))
-}) %>% bind_rows()
+# If AOI contains multiple geometries, use the largest
+aoi_largest <- project(aoi[which.max(expanse(aoi)),,], "epsg:4326")
+
+setGDALconfig("GS_NO_SIGN_REQUEST=YES")
+pvout_url <- "/vsigs/city-scan-global-data/globalsolar/PVOUT-monthly.tif"
+
+monthly_pv <- rast(pvout_url) %>%
+  terra::extract(aoi_largest, include_area = T) %>%
+  .[,-1] %>% as.matrix() %>%
+  { data.frame(
+    month = 1:12,
+    max = matrixStats::colMaxs(.),
+    min = matrixStats::colMins(.),
+    mean = colMeans(.) )}
 
 pv_plot <- monthly_pv %>%
-  mutate(daily = mean/lubridate::days_in_month(month)) %>%
-  ggplot(aes(x = month, y = daily)) +
+  ggplot(aes(x = month, y = mean)) +
   annotate("text", x = 1, y = 4.6, label = "Excellent Conditions", vjust = 0, hjust = 0, color = "dark grey") +
   annotate("text", x = 1, y = 3.6, label = "Favorable Conditions", vjust = 0, hjust = 0, color = "dark grey") +
   geom_line() +

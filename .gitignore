@@ -179,7 +179,6 @@ multi-scan-materials/.DS_Store
 *.prj
 *.shp
 *.shx
-*.qmd
 
 # Other data files
 *.json

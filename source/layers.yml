@@ -27,8 +27,6 @@ wsf:
   fuzzy_string: wsf_4326.tif$
   title: 'Year of urban expansion'
   breaks: [1985, 1986, 1996, 2006, 2015]
-  # labels: ['Before 1986', '1986', '1996', '2006', '2015']
-  # breaks: [1986, 1996, 2006, 2015] # Confusingly, if we are using discrete labels, need to remove minimum break
   labels: ['Before 1986', '1986-1995', '1996-2005', '2006-2015']
   palette: ['#FBF9CD', '#E3B854', '#BF4A3B', '#25110B']
 land_cover:

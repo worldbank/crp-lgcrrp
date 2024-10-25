@@ -29,7 +29,7 @@ if(is.null(wards)) {
             directory = styled_maps_dir)
 }
 
-# Plot landmarks
+# Plot landmarks ---------------------------------------------------------------
 landmarks <- fuzzy_read(user_input_dir, "Landmark")
 if (inherits(landmarks, "SpatVector")) {
   landmarks <- landmarks %>% project("epsg:4326") %>% select(Name)
@@ -85,5 +85,6 @@ plots %>% walk2(names(.), \(plot, name) {
   save_plot(plot, filename = glue("{name}.png"), directory = styled_maps_dir)
 })
 
+# See which layers weren't successfully mapped
 unmapped <- setdiff(c(names(layer_params), "aoi", "forest_deforest", "burnt_area"), names(plots))
 if (length(unmapped) > 0) warning(paste(length(unmapped), "layers not mapped (not counting flood overlays):\n-", paste(unmapped, collapse = "\n- ")))

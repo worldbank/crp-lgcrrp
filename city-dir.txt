@@ -1,4 +1,4 @@
-mnt/city-directories/…
+mnt/
 
 # Use this file to set the path to the city directory. The city directory will 
 # be created by the data processing step, and will have sub-folders called
