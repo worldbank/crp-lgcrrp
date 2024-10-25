@@ -1,8 +1,8 @@
 # raster processing
 # if the first item is False, all other items in this section will be skipped
-raster_processing: True
-population: True
-wsf: True
+raster_processing: False
+population: False
+wsf: False
 elevation: False
 slope: False
 solar: False
@@ -36,7 +36,7 @@ fwi: False
 landcover_burn: False
 
 # road network
-road_network: True
+road_network: False
 
 # other
 erosion: False

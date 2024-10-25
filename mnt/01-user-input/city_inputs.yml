@@ -1,8 +1,8 @@
 # city basic info
-city_name: 'Cumilla'
-AOI_shp_name: "cumilla"
-country_name: 'Bangladesh'
-country_iso3: 'BGD'
+city_name: Cumilla
+AOI_shp_name: cumilla
+country_name: Bangladesh
+country_iso3: BGD
 
 # land surface temperature parameters
 first_year: 2014
