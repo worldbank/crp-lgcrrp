@@ -59,7 +59,7 @@ if menu['winter_lst']:
         for i in range(math.floor(city_inputs['first_year'] / 10) * 10, math.ceil(city_inputs['last_year'] / 10) * 10, 10):
             if i >= 2020:
                 continue
-            nc = xr.open_dataset(f"{global_inputs['temperature_source']}/cru_ts4.06.{i+1}.{i+10}.tmp.dat.nc")
+            nc = xr.open_dataset(f"mnt/source-data/{global_inputs['temperature_source']}/cru_ts4.06.{i+1}.{i+10}.tmp.dat.nc")
 
             for month in range(1, 13):
                 temp_dict[month] = []

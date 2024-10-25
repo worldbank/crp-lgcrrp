@@ -383,8 +383,7 @@ if menu['raster_processing']:
                 flood_type_folder_dict = {'coastal': 'COASTAL_UNDEFENDED',
                                         'fluvial': 'FLUVIAL_UNDEFENDED',
                                         'pluvial': 'PLUVIAL_DEFENDED'}
-                # raw_flood_folder = Path(global_inputs['flood_source']) / city_inputs['country_name'] / flood_type_folder_dict[flood_type]
-                raw_flood_folder = Path('mnt/source-data/fathom') / flood_type_folder_dict[flood_type]
+                raw_flood_folder = Path(f"mnt/source-data/{global_inputs['flood_source']}") / flood_type_folder_dict[flood_type]
                 
                 # prepare flood raster files (everything before clipping)
                 for year in flood_years:

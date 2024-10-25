@@ -1,6 +1,7 @@
 # TODO: simplify this so that the user only needs to provide one file path where all data are stored
 # TODO: delete the unused ones
 flood_source: 'fathom'
+temperature_source: "cru"
 
 # GEE data output location
 drive_folder: 'LGCRRP'
@@ -64,7 +65,6 @@ rwi_source: ''
 burned_area_source: ''
 fwi_source: ''
 lc_burn_source: ""
-temperature_source: ""
 erosion_source: ""
 lightning_source: ""
 water_salinity_source: ""

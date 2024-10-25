@@ -179,6 +179,7 @@ multi-scan-materials/.DS_Store
 *.prj
 *.shp
 *.shx
+*.qmd
 
 # Other data files
 *.json
@@ -191,6 +192,8 @@ python/cache/*
 cache/*
 python/data/*
 mnt/*/02-process-output/*
+mnt/source-data/cru
+mnt/source-data/fathom
 *.Rhistory
 
 # GitHub Wiki
