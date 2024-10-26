@@ -29,7 +29,7 @@ if menu['summer_lst']:
         global_inputs = yaml.safe_load(f)
 
     # set output folder
-    output_folder = Path(f'mnt/{city_name_l}/02-process-output/tabular')
+    output_folder = Path(f'mnt/city-directories/{city_name_l}/02-process-output/tabular')
     os.makedirs(output_folder, exist_ok=True)
 
     # Initialize Earth Engine
@@ -38,7 +38,7 @@ if menu['summer_lst']:
     landsat = ee.ImageCollection("LANDSAT/LC08/C02/T1_L2")
 
     # Read AOI shapefile --------
-    aoi_file = gpd.read_file(f'mnt/{city_name_l}/01-user-input/AOI/{city_name_l}.shp').to_crs(epsg = 4326)
+    aoi_file = gpd.read_file(f'mnt/city-directories/{city_name_l}/01-user-input/AOI/{city_name_l}.shp').to_crs(epsg = 4326)
     centroid = aoi_file.centroid
 
     # Convert shapefile to ee.Geometry ------------
@@ -56,14 +56,14 @@ if menu['summer_lst']:
     # Identify hottest months using CRU data ----------------------
     if not exists(output_folder / f'{city_name_l}_hottest_months.txt'):
         temp_dict = {}
-        for i in range(math.floor(city_inputs['first_year'] / 10) * 10, math.ceil(city_inputs['last_year'] / 10) * 10, 10):
+        for i in range(math.floor(global_inputs['first_year'] / 10) * 10, math.ceil(global_inputs['last_year'] / 10) * 10, 10):
             if i >= 2020:
                 continue
             nc = xr.open_dataset(f"mnt/source-data/{global_inputs['temperature_source']}/cru_ts4.06.{i+1}.{i+10}.tmp.dat.nc")
 
             for month in range(1, 13):
                 temp_dict[month] = []
-                for year in range(max(i, city_inputs['first_year']), min(i+11, city_inputs['last_year'])):
+                for year in range(max(i, global_inputs['first_year']), min(i+11, global_inputs['last_year'])):
                     time = str(year) + '-' + str(month) + '-15'
                     val = nc.sel(lon = centroid.x[0], lat = centroid.y[0], time = time, method = 'nearest')['tmp'].to_dict()['data']
                     temp_dict[month].append(val)
@@ -92,9 +92,9 @@ if menu['summer_lst']:
     # Date filter -----------------
     def ee_filter_month(month):
         if 1 <= month <= 11:
-            return [ee.Filter.date(f'{year}-{str(month).zfill(2)}-01', f'{year}-{month+1}-01') for year in range(city_inputs['first_year'], city_inputs['last_year'] + 1)]
+            return [ee.Filter.date(f'{year}-{str(month).zfill(2)}-01', f'{year}-{month+1}-01') for year in range(global_inputs['first_year'], global_inputs['last_year'] + 1)]
         elif month == 12:
-            return [ee.Filter.date(f'{year}-12-01', f'{year+1}-01-01') for year in range(city_inputs['first_year'], city_inputs['last_year'] + 1)]
+            return [ee.Filter.date(f'{year}-12-01', f'{year+1}-01-01') for year in range(global_inputs['first_year'], global_inputs['last_year'] + 1)]
         else:
             return
     

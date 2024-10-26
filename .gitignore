@@ -180,6 +180,18 @@ multi-scan-materials/.DS_Store
 *.shp
 *.shx
 *.qmd
+*.sbn
+*.sbx
+*.fbn
+*.fbx
+*.ain
+*.aih
+*.ixs
+*.mxs
+*.atx
+*.shp.xml
+*.qix
+*.idx
 
 # Other data files
 *.json
@@ -191,7 +203,7 @@ multi-scan-materials/.DS_Store
 python/cache/*
 cache/*
 python/data/*
-mnt/*/02-process-output/*
+mnt/city-directories
 mnt/source-data/cru
 mnt/source-data/fathom
 *.Rhistory

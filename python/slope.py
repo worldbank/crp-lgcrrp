@@ -24,7 +24,7 @@ if menu['raster_processing'] and menu['slope']:
         global_inputs = yaml.safe_load(f)
 
     # Define output folder ---------
-    output_folder_parent = Path(f'mnt/{city_name_l}/02-process-output')
+    output_folder_parent = Path(f'mnt/city-directories/{city_name_l}/02-process-output')
     output_folder_s = output_folder_parent / 'spatial'
     output_folder_t = output_folder_parent / 'tabular'
     os.makedirs(output_folder_t, exist_ok=True)

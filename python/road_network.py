@@ -34,15 +34,17 @@ if menu['road_network']:
 
     # Read AOI shapefile --------
     # transform the input gpkg to correct prj (epsg 4326)
-    aoi_file = gpd.read_file(f'mnt/{city_name_l}/01-user-input/AOI/{city_name_l}.shp').to_crs(epsg = 4326)
+    aoi_file = gpd.read_file(f'mnt/city-directories/{city_name_l}/01-user-input/AOI/{city_name_l}.shp').to_crs(epsg = 4326)
     features = aoi_file.geometry
 
     # Define output folder ---------
-    output_folder_parent = Path(f'mnt/{city_name_l}/02-process-output')
+    output_folder_parent = Path(f'mnt/city-directories/{city_name_l}/02-process-output')
     output_folder_s = output_folder_parent / 'spatial'
     output_folder_t = output_folder_parent / 'tabular'
+    output_folder_i = output_folder_parent / 'images'
     os.makedirs(output_folder_s, exist_ok=True)
     os.makedirs(output_folder_t, exist_ok=True)
+    os.makedirs(output_folder_i, exist_ok=True)
     
 
     # FUNCTIONS ###################################
@@ -55,16 +57,12 @@ if menu['road_network']:
         return boundary_poly
 
     def get_graph():
-        # if not exists(output_folder_s / f'{city_name_l}_road_network'):
-        #     os.mkdir(output_folder_s / f'{city_name_l}_road_network')
-        
         print(f'Fetching graph data for {AOI_name}')
         
         poly = get_polygon()
         poly = poly.buffer(0)
         
         try:
-            # with open(output_folder_s / f'{city_name_l}_road_network/{city_name_l}', 'rb') as f:
             with open(output_folder_s / city_name_l, 'rb') as f:
                 G = pickle.load(f)
             
@@ -77,7 +75,6 @@ if menu['road_network']:
         print('Writing graph file')
         
         if val != 1:
-            # with open(output_folder_s / f'{city_name_l}_road_network/{city_name_l}', 'wb') as f:
             with open(output_folder_s / city_name_l, 'wb') as f:
                 pickle.dump(G, f, pickle.HIGHEST_PROTOCOL)
         
@@ -85,7 +82,6 @@ if menu['road_network']:
 
     def get_centrality_stats():
         try:
-            # edges = gpd.read_file(output_folder_s / f"{city_name_l}_road_network/{city_name_l}_nodes_and_edges.gpkg")
             edges = gpd.read_file(output_folder_s / f"{city_name_l}_nodes_and_edges.gpkg", layer = 'edges')
             
             if 'edge_centr' in edges.columns:
@@ -131,13 +127,8 @@ if menu['road_network']:
         print('Saving output gdf')
         
         G = nx.MultiDiGraph(G)
-        # graph_gpkg = output_folder_s / f'{city_name_l}_road_network' / f'{city_name_l}_nodes_and_edges.gpkg'
         graph_gpkg = output_folder_s / f'{city_name_l}_nodes_and_edges.gpkg'
         ox.save_graph_geopackage(G, filepath = graph_gpkg)
-        # os.makedirs(output_folder_s / f'{city_name_l}_edges', exist_ok=True)
-        # os.makedirs(output_folder_s / f'{city_name_l}_nodes', exist_ok=True)
-        # gpd.read_file(graph_gpkg, layer = 'edges').to_file(output_folder_s / f'{city_name_l}_edges' / f'{city_name_l}_edges.shp')
-        # gpd.read_file(graph_gpkg, layer = 'nodes').to_file(output_folder_s / f'{city_name_l}_nodes' / f'{city_name_l}_nodes.shp')        
         
         print('Getting basic stats')
         
@@ -154,8 +145,7 @@ if menu['road_network']:
         
         fig, ax = ox.plot_graph(G, bgcolor = '#ffffff', node_color = '#336699', node_zorder = 2, node_size = 5, show = False)
         
-        # fig.savefig(output_folder_s / f'{city_name_l}_road_network/{city_name_l}_network_plot.png', dpi = 300)
-        fig.savefig(output_folder_s / f'{city_name_l}_network_plot.png', dpi = 300)
+        fig.savefig(output_folder_i / f'{city_name_l}_network_plot.png', dpi = 300)
         
         return 
 
@@ -180,7 +170,7 @@ if menu['road_network']:
 
         polar_plot(ax, bearings)
         
-        fig.savefig(output_folder_s / f'{city_name_l}_road_radar_plot.png', dpi = 300)
+        fig.savefig(output_folder_i / f'{city_name_l}_road_radar_plot.png', dpi = 300)
         
         return
 

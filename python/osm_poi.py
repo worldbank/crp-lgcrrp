@@ -29,7 +29,7 @@ if menu['osm_poi']:
 
     # Read AOI shapefile --------
     # transform the input shp to correct prj (epsg 4326)
-    aoi_orig = gpd.read_file(city_inputs['AOI_path']).to_crs(epsg = 4326)
+    aoi_orig = gpd.read_file(f'mnt/city-directories/{city_name_l}/01-user-input/AOI/{city_name_l}.shp').to_crs(epsg = 4326)
     # buffer AOI by 5% of its width to capture roads immedately outside of city boundaries
     # TODO: determine whether to put this 5% buffer distance in one of the yaml files
     buff_dist = (aoi_orig.total_bounds[2] - aoi_orig.total_bounds[0]) * 0.05
@@ -37,7 +37,7 @@ if menu['osm_poi']:
     features = aoi_file.geometry
     
     # Define output folder ---------
-    output_folder = Path(f'mnt/{city_name_l}/02-process-output/spatial')
+    output_folder = Path(f'mnt/city-directories/{city_name_l}/02-process-output/spatial')
     os.makedirs(output_folder, exist_ok=True)
 
 

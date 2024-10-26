@@ -33,12 +33,12 @@ if menu['flood_stats']:
     # Read AOI shapefile --------
     print('read AOI shapefile')
     # transform the input shp to correct prj (epsg 4326)
-    aoi_file = gpd.read_file(f'mnt/{city_name_l}/01-user-input/AOI/{city_name_l}.shp').to_crs(epsg = 4326)
+    aoi_file = gpd.read_file(f'mnt/city-directories/{city_name_l}/01-user-input/AOI/{city_name_l}.shp').to_crs(epsg = 4326)
     features = aoi_file.geometry
     aoi_bounds = aoi_file.bounds
 
     # Define output folder ---------
-    output_folder_parent = Path(f'mnt/{city_name_l}/02-process-output')
+    output_folder_parent = Path(f'mnt/city-directories/{city_name_l}/02-process-output')
     output_folder_s = output_folder_parent / 'spatial'
     output_folder_t = output_folder_parent / 'tabular'
     os.makedirs(output_folder_s, exist_ok=True)

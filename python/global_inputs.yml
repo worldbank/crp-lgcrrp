@@ -1,7 +1,7 @@
 # TODO: simplify this so that the user only needs to provide one file path where all data are stored
 # TODO: delete the unused ones
 flood_source: 'fathom'
-temperature_source: "cru"
+temperature_source: "cru/tmp"
 
 # GEE data output location
 drive_folder: 'LGCRRP'

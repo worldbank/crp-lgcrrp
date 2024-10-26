@@ -26,7 +26,7 @@ if menu['landcover']:
         global_inputs = yaml.safe_load(f)
 
     # set output folder
-    output_folder = Path(f'mnt/{city_name_l}/02-process-output/tabular')
+    output_folder = Path(f'mnt/city-directories/{city_name_l}/02-process-output/tabular')
     os.makedirs(output_folder, exist_ok=True)
 
     # Initialize Earth Engine
@@ -35,7 +35,7 @@ if menu['landcover']:
     lc = ee.ImageCollection('ESA/WorldCover/v200').first()
 
     # Read AOI shapefile --------
-    aoi_file = gpd.read_file(f'mnt/{city_name_l}/01-user-input/AOI/{city_name_l}.shp').to_crs(epsg = 4326)
+    aoi_file = gpd.read_file(f'mnt/city-directories/{city_name_l}/01-user-input/AOI/{city_name_l}.shp').to_crs(epsg = 4326)
 
     # Convert shapefile to ee.Geometry ------------
     jsonDict = eval(gpd.GeoSeries([aoi_file['geometry'].force_2d().union_all()]).to_json())
