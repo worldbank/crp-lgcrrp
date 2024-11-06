@@ -65,7 +65,7 @@ unlist(lapply(layer_params, \(x) x$fuzzy_string)) %>%
       data <- fuzzy_read(spatial_dir, fuzzy_string) %>% vectorize_if_coarse()
       plot <- plot_layer(
         data = data, yaml_key = yaml_key,
-        plot_aoi = is.null(wards), plot_wards = !is.null(wards))
+        plot_wards = !is.null(wards), plot_roads = F)
       plots[[yaml_key]] <<- plot
       message(paste("Success:", yaml_key))
     },

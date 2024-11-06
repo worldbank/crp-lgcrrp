@@ -6,7 +6,7 @@ plot_flooding <- function(flood_type) {
   if (all(is.na(values(flood_data)))) values(flood_data)[1] <- 0
   plots[[flood_type]] <<- plot_layer(
     flood_data, yaml_key = flood_type,
-    plot_aoi = is.null(wards), plot_wards = !is.null(wards))
+    plot_aoi = T, plot_wards = !is.null(wards))
   if (!is.null(plots$population)) plots[[glue("{flood_type}_population")]] <<-
     plot_layer(flood_data, yaml_key = flood_type, baseplot = plots$population)
   if (!is.null(plots$wsf)) plots[[glue("{flood_type}_wsf")]] <<-
