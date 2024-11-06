@@ -40,7 +40,7 @@ if menu['landcover_burn']:
 
     # PROCESSING ########################################
     if not exists(output_folder / f'{city_name_l}_lc_burn.tif'):
-        with rasterio.open(global_inputs['lc_burn_source']) as src:
+        with rasterio.open(f"mnt/source-data/{global_inputs['lc_burn_source']}") as src:
             # shapely presumes all operations on two or more features exist in the same Cartesian plane.
             out_image, out_transform = rasterio.mask.mask(
                 src, features, all_touched = True, crop = True)

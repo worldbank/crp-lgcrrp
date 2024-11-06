@@ -57,7 +57,7 @@ if menu['fwi']:
 
         # clip raster and store in dict --------------------
         for year in range(global_inputs['fwi_first_year'], global_inputs['fwi_last_year'] + 1):
-            for r in glob.glob(f"{global_inputs['fwi_source']}/FWI.GEOS-5.Daily.Default.{year}*.tif"):
+            for r in glob.glob(f"mnt/source-data/{global_inputs['fwi_source']}/FWI.GEOS-5.Daily.Default.{year}*.tif"):
                 with rasterio.open(r, 'r+') as src:
                     src.crs = CRS.from_epsg(4326)
                     

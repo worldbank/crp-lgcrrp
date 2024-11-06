@@ -10,8 +10,6 @@ if menu['elevation']:
     
     import ee
     import geopandas as gpd
-    from pathlib import Path
-    import numpy as np
 
     # SET UP #########################################
     # load city inputs files, to be updated for each city scan

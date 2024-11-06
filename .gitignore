@@ -205,7 +205,10 @@ cache/*
 python/data/*
 mnt/city-directories
 mnt/source-data/cru
+mnt/source-data/cyclone
 mnt/source-data/fathom
+mnt/source-data/Global Soil Salinity
+mnt/source-data/Water salinity
 *.Rhistory
 
 # GitHub Wiki

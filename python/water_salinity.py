@@ -33,7 +33,7 @@ if menu['water_salinity']:
     # Define output folder ---------
     output_folder = Path('mnt/02-process-output')
 
-    os.mkdir(output_folder, exist_ok=True)
+    os.makedirs(output_folder, exist_ok=True)
     
 
     # SET PARAMETERS ################################
@@ -46,12 +46,11 @@ if menu['water_salinity']:
     data_folder = Path('data')
     ws_folder = data_folder / 'water_salinity'
 
-    if not exists(ws_folder):
-        os.mkdir(ws_folder)
+    os.makedirs(ws_folder, exist_ok=True)
     
     for water_body in water_bodies:
         for data_type in data_types:
             if not exists(ws_folder / f'{country_name_l}_{water_body}_{data_type}.csv'):
-                df = pd.read_csv(Path(global_inputs['water_salinity_source']) / f'{water_body}_{data_type}.csv', low_memory = False)
+                df = pd.read_csv(Path(f"mnt/source-data/{global_inputs['water_salinity_source']}") / f'{water_body}_{data_type}.csv', low_memory = False)
                 df[df['Country'] == city_inputs['country_name']].to_csv(ws_folder / f'{country_name_l}_{water_body}_{data_type}.csv')
     

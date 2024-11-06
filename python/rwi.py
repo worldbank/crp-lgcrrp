@@ -39,7 +39,7 @@ if menu['rwi']:
     os.makedirs(output_folder, exist_ok=True)
 
     # PROCESS RWI DATA ################################
-    rwi_data = Path(global_inputs['rwi_source']) / f"{city_inputs['country_iso3']}_relative_wealth_index.csv"
+    rwi_data = f"mnt/source-data/{global_inputs['rwi_source']}/{city_inputs['country_iso3']}_relative_wealth_index.csv"
     
     if exists(rwi_data):
         if not exists(output_folder / f"{city_name_l}_rwi.gpkg"):
