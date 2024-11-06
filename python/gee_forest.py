@@ -10,7 +10,6 @@ if menu['forest']:
     
     import ee
     import geopandas as gpd
-    import datetime as dt
 
     # SET UP #########################################
     # load city inputs files, to be updated for each city scan

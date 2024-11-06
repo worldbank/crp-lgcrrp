@@ -1,7 +1,7 @@
-# TODO: simplify this so that the user only needs to provide one file path where all data are stored
-# TODO: delete the unused ones
 flood_source: 'fathom'
 temperature_source: "cru/tmp"
+water_salinity_source: "Water salinity"
+soil_salinity_source: 'Global Soil Salinity'
 
 # GEE data output location
 drive_folder: 'LGCRRP'
@@ -60,17 +60,17 @@ fwi_first_year: 2016
 fwi_last_year: 2021
 
 # other data sources (for potential future use)
-solar_source: ""
-solar_graph_source: ""
-air_source: ""
-landslide_source: ""
-liquefaction_source: ''
+elevation_source: ""
 rwi_source: ''
 burned_area_source: ''
 fwi_source: ''
 lc_burn_source: ""
 erosion_source: ""
+
+# below data sources need to point to the specific raster file in mnt/source-data/, not just the directory
+solar_source: ""
+solar_graph_source: ""
+air_source: ""
+landslide_source: ""
+liquefaction_source: ''
 lightning_source: ""
-water_salinity_source: ""
-soil_salinity_source: ''
-elevation_source: ""

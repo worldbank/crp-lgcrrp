@@ -9,7 +9,6 @@ if menu['erosion']:
     print('run erosion')
 
     import os
-    import pandas as pd
     import geopandas as gpd
     from pathlib import Path
     from os.path import exists
@@ -44,7 +43,7 @@ if menu['erosion']:
         features = aoi_buff.geometry
 
         # Read data --------------
-        real_nodes = gpd.read_file(global_inputs['erosion_source'])
+        real_nodes = gpd.read_file(f"mnt/source-data/{global_inputs['erosion_source']}")
 
         # Filter REAL data ----------------
         real_aoi = real_nodes[real_nodes.geometry.intersects(features.unary_union)]

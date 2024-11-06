@@ -16,6 +16,7 @@ if menu['soil_salinity']:
     import rasterio
     import rasterio.mask
     import numpy as np
+    from rasterio.merge import merge
 
     # SET UP #########################################
     # load city inputs files, to be updated for each city scan
@@ -51,7 +52,7 @@ if menu['soil_salinity']:
         i = 0
         for x in xs:
             for y in ys:
-                input_raster = Path(global_inputs['soil_salinity_source']) / f"salMap{year}-{x}-{y}.tif.tif"
+                input_raster = Path(f"mnt/source-data/{global_inputs['soil_salinity_source']}") / f"salMap{year}-{x}-{y}.tif.tif"
                 try:
                     with rasterio.open(input_raster) as src:
                         out_image, out_transform = rasterio.mask.mask(
@@ -69,19 +70,44 @@ if menu['soil_salinity']:
                     i += 1
                 except:
                     pass
-        if exists(output_folder_s / f'{city_name_l}_soil_salinity_{year}_0.tif'):
-            if exists(output_folder_s / f'{city_name_l}_soil_salinity_{year}_1.tif'):
-                continue
-                # TODO: merge rasters
-            else:
-                os.replace(output_folder_s / f'{city_name_l}_soil_salinity_{year}_0.tif', output_folder_s / f'{city_name_l}_soil_salinity_{year}.tif')
+        # List all files in the directory
+        files = [f for f in os.listdir(output_folder_s) if f.startswith(f'{city_name_l}_soil_salinity_{year}') and f.endswith('.tif')]
+
+        # Sort files to ensure correct order (optional, depending on your need)
+        files.sort()
+
+        if len(files) == 1:
+            os.replace(output_folder_s / f'{city_name_l}_soil_salinity_{year}_0.tif', output_folder_s / f'{city_name_l}_soil_salinity_{year}.tif')
+        else:
+            # If there are multiple files, mosaic them
+            src_files_to_mosaic = [rasterio.open(os.path.join(output_folder_s, f)) for f in files]
+
+            # Merge the rasters
+            mosaic, out_trans = merge(src_files_to_mosaic)
+
+            # Save the mosaic raster to disk
+            out_meta = src_files_to_mosaic[0].meta.copy()
+            out_meta.update({
+                'driver': 'GTiff',
+                'height': mosaic.shape[1],
+                'width': mosaic.shape[2],
+                'transform': out_trans,
+                'count': mosaic.shape[0]  # This is typically 1 for single-band rasters
+            })
+
+            with rasterio.open(output_folder_s / f'{city_name_l}_soil_salinity_{year}.tif', 'w', **out_meta) as dest:
+                dest.write(mosaic)
+
+            # Close all open raster files
+            for src in src_files_to_mosaic:
+                src.close()
 
         with rasterio.open(output_folder_s / f'{city_name_l}_soil_salinity_{year}.tif') as src:
             temp_array = src.read(1)
             # temp_array = temp_array[temp_array != 0]
             avg_dict[year] = np.nanmean(temp_array)
     
-    with open(f'mnt/02-process-output/tabular/{city_name_l}_soil_salinity.csv', 'w') as f:
+    with open(f'{output_folder_t}/{city_name_l}_soil_salinity.csv', 'w') as f:
         f.write('year,avg\n')
         for year in avg_dict:
             f.write("%s,%s\n"%(year, avg_dict[year]))

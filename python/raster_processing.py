@@ -656,7 +656,8 @@ if menu['raster_processing']:
         try:
             clipdata(elev_folder / f'{city_name_l}_elevation.tif', 'elevation')
         except:
-            failed.append('process elevation failed')
+            with open('python/gee_elevation.py') as f:
+                exec(f.read())
     
     # demographics
     if menu['demographics']:
@@ -861,14 +862,9 @@ if menu['raster_processing']:
     # in both yaml files, the key for the data source must be the raster name from the list above + '_source'
     for r in simple_raster_clip:
         if menu[r]:
-            if (f'{r}_source' in city_inputs) and bool(city_inputs[f'{r}_source']):
+            if (f'{r}_source' in global_inputs) and bool(global_inputs[f'{r}_source']):
                 try:
-                    clipdata(city_inputs[f'{r}_source'], r)
-                except:
-                    failed.append(f'process {r} failed')
-            elif (f'{r}_source' in global_inputs) and bool(global_inputs[f'{r}_source']):
-                try:
-                    clipdata(global_inputs[f'{r}_source'], r)
+                    clipdata(f"mnt/source-data/{global_inputs[f'{r}_source']}", r)
                 except:
                     failed.append(f'process {r} failed')
             else:
