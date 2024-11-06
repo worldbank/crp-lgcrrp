@@ -389,9 +389,10 @@ break_lines <- function(x, width = 20, newline = "<br>") {
 }
 
 format_title <- function(title, subtitle, width = 20) {
-  title_broken <- break_lines(title, width = width, newline = "<br>")
+  title_broken <- paste0(break_lines(title, width = width, newline = "<br>"), "<br>")
+  if (is.null(subtitle)) return(title_broken)
   subtitle_broken <- break_lines(subtitle, width = width, newline = "<br>")
-  formatted_title <- paste0(title_broken, "<br><br><br><em>", subtitle_broken, "</em><br>")
+  formatted_title <- paste0(title_broken, "<br><em>", subtitle_broken, "</em><br>")
   return(formatted_title)
 }
 

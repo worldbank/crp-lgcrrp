@@ -59,7 +59,6 @@ if (inherits(landmarks, "SpatVector")) {
 
 # Standard plots ---------------------------------------------------------------
 unlist(lapply(layer_params, \(x) x$fuzzy_string)) %>%
-  # keep_at("land_cover") %>%
   map2(names(.), \(fuzzy_string, yaml_key) {
     tryCatch({
       data <- fuzzy_read(spatial_dir, fuzzy_string) %>% vectorize_if_coarse()
