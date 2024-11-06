@@ -79,6 +79,7 @@ unlist(lapply(layer_params, \(x) x$fuzzy_string)) %>%
 # source("R/map-deforestation.R")
 source("R/map-flooding.R")
 # source("R/map-historical-burnt-area.R")
+source("R/map-cyclones.R")
 
 # Save plots -------------------------------------------------------------------
 plots %>% walk2(names(.), \(plot, name) {

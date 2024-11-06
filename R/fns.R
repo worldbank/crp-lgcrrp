@@ -250,13 +250,13 @@ theme_custom <- function(...) {
   ...)
 }
 
-coord_3857_bounds <- function(...) {
+coord_3857_bounds <- function(..., expansion = 1) {
   bbox_3857 <- st_bbox(st_transform(static_map_bounds, crs = "epsg:3857"))
   coord_sf(
     crs = "epsg:3857",
     expand = F,
-    xlim = bbox_3857[c(1,3)],
-    ylim = bbox_3857[c(2,4)],
+    xlim = bbox_3857[c(1,3)] %>% { (. - mean(.)) * expansion + mean(.)},
+    ylim = bbox_3857[c(2,4)] %>% { (. - mean(.)) * expansion + mean(.)},
     ...)
 }
 

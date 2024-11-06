@@ -195,3 +195,10 @@ moisture_seasonal:
   palette: ['#D45A35', '#F6F7F9', '#48A787']
   center: 0
   bins: 5
+cyclones:
+  fuzzy_string: STORM
+  title: Max Windspeed
+  subtitle: Maximum windspeed projected for a 50-year return period (m/s)
+  palette: ['purple', 'yellow']
+  breaks: [0, 9, 14, 17, 32, 40]
+  labels:  ["0 m/s", 9 m/s (Depression), 14 m/s (Deep depression), 17 m/s (Tropical storm), 32 m/s (Cyclone), ""]
