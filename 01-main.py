@@ -29,6 +29,7 @@ for suf in shp_suf1:
 copyfile("mnt/01-user-input/city_inputs.yml", f'mnt/city-directories/{city_name_l}/01-user-input/city_inputs.yml')
 
 script_list = ["burned_area.py",
+               'cyclone.py',
                'fwi.py',
                "gee_forest.py",
                "gee_landcover.py",

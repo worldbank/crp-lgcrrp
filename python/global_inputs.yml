@@ -71,6 +71,6 @@ erosion_source: ""
 solar_source: ""
 solar_graph_source: ""
 air_source: ""
-landslide_source: ""
+landslide_source: "landslide/global_landslide_raster.tif"
 liquefaction_source: ''
 lightning_source: ""
