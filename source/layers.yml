@@ -202,3 +202,9 @@ cyclones:
   palette: ['purple', 'yellow']
   breaks: [0, 9, 14, 17, 32, 40]
   labels:  ["0 m/s", 9 m/s (Depression), 14 m/s (Deep depression), 17 m/s (Tropical storm), 32 m/s (Cyclone), ""]
+soil_salinity:
+  fuzzy_string: soil_salinity_2016
+  title: Soil Salinity
+  palette: ['#ECFEDD', 'orangered']
+  breaks: [0, 2, 4, 8, 16, 40]
+  labels: [Non-saline, Slightly, Moderately, Highly, Extremely]
