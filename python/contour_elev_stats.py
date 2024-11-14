@@ -75,14 +75,9 @@ if menu['raster_processing'] and menu['elevation']:
         contourLevels = range(contourMin, contourMax + contourInt, contourInt)
         
         # Create contour shapefile
-        # os.makedirs(output_folder_s / f'{city_name_l}_contour')
-        contourPath = str(output_folder_s / f'{city_name_l}_contour.gpkg')
+        contourPath = str(output_folder_s / f'{city_name_l}_contours.gpkg')
         contourDs = ogr.GetDriverByName("GPKG").CreateDataSource(contourPath)
         contourShp = contourDs.CreateLayer('contour', proj)
-
-        # contourPath = str(output_folder_s / f'{city_name_l}_contour' / f'{city_name_l}_contour.shp')
-        # contourDs = ogr.GetDriverByName("ESRI Shapefile").CreateDataSource(contourPath)
-        # contourShp = contourDs.CreateLayer('contour', proj)
 
         # Define fields for ID and elevation
         fieldDef = ogr.FieldDefn("ID", ogr.OFTInteger)

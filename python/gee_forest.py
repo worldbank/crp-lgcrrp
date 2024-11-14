@@ -25,7 +25,7 @@ if menu['forest']:
     # Initialize Earth Engine
     ee.Initialize()
 
-    fc = ee.Image("UMD/hansen/global_forest_change_2018_v1_6")
+    fc = ee.Image("UMD/hansen/global_forest_change_2023_v1_11")
 
     # Read AOI shapefile --------
     aoi_file = gpd.read_file(f'mnt/city-directories/{city_name_l}/01-user-input/AOI/{city_name_l}.shp').to_crs(epsg = 4326)
@@ -42,20 +42,20 @@ if menu['forest']:
 
 
     # PROCESSING #####################################
-    no_data_val = -9999
+    no_data_val = 0
 
-    deforestation0018 = fc.select('loss').eq(1).clip(AOI).unmask(value = no_data_val, sameFootprint = False).rename('fcloss0018')
+    deforestation0023 = fc.select('loss').eq(1).clip(AOI).unmask(value = no_data_val, sameFootprint = False).rename('fcloss0023')
     forestCover00 = fc.select('treecover2000').gte(20).clip(AOI)
-    forestCoverGain0018 = fc.select('gain').eq(1).clip(AOI)
-    forestCover18 = forestCover00.subtract(deforestation0018).add(forestCoverGain0018).gte(1).rename('fc00').unmask(value = no_data_val, sameFootprint = False)
-
-    # fc18Andfcloss = deforestation0018.addBands(forestCover18)
+    # note: forest gain is only updated until 2012
+    forestCoverGain0012 = fc.select('gain').eq(1).clip(AOI)
+    forestCover23 = forestCover00.subtract(deforestation0023).add(forestCoverGain0012).gte(1).rename('fc23').unmask(value = no_data_val, sameFootprint = False)
+    deforestation_year = fc.select('lossyear').clip(AOI).unmask(value = no_data_val, sameFootprint = False)
 
     # Export results to Google Cloud Storage bucket ------------------
-    task0 = ee.batch.Export.image.toDrive(**{'image': forestCover18,
-                                             'description': f'{city_name_l}_ForestCover18',
+    task0 = ee.batch.Export.image.toDrive(**{'image': forestCover23,
+                                             'description': f'{city_name_l}_forest_cover23',
                                              'region': AOI,
-                                             'scale': 30,
+                                            #  'scale': 30,
                                              'folder': global_inputs['drive_folder'],
                                              'maxPixels': 1e9,
                                              'fileFormat': 'GeoTIFF',
@@ -65,10 +65,10 @@ if menu['forest']:
                                              }})
     task0.start()
 
-    task1 = ee.batch.Export.image.toDrive(**{'image': deforestation0018,
-                                             'description': f'{city_name_l}_Deforestation',
+    task1 = ee.batch.Export.image.toDrive(**{'image': deforestation_year,
+                                             'description': f'{city_name_l}_deforestation',
                                              'region': AOI,
-                                             'scale': 30,
+                                            #  'scale': 30,
                                              'folder': global_inputs['drive_folder'],
                                              'maxPixels': 1e9,
                                              'fileFormat': 'GeoTIFF',

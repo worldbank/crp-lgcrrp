@@ -68,7 +68,7 @@ if menu['nightlight']:
         'description': f'{city_name_l}_linfit',
         'folder': global_inputs['drive_folder'],
         'region': AOI,
-        'scale': 100,
+        # 'scale': 100,
         'maxPixels': 1e9,
         'fileFormat': 'GeoTIFF',
         'formatOptions': {
@@ -79,11 +79,11 @@ if menu['nightlight']:
     task0.start()
 
     task1 = ee.batch.Export.image.toDrive(**{
-       'image': sum_of_light.select('avg_rad_sum'),
+        'image': sum_of_light.select('avg_rad_sum'),
         'description': f'{city_name_l}_avg_rad_sum',
         'folder': global_inputs['drive_folder'],
         'region': AOI,
-        'scale': 100,
+        # 'scale': 100,
         'maxPixels': 1e9,
         'fileFormat': 'GeoTIFF',
         'formatOptions': {

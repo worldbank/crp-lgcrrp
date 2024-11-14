@@ -132,10 +132,10 @@ if menu['green']:
     # Export results to Google Cloud Storage bucket ------------------
     task0 = ee.batch.Export.image.toDrive(**{
         'image': ndvi_Season,
-        'description': f'{city_name_l}_NDVI_Season',
+        'description': f'{city_name_l}_ndvi_season',
         'folder': global_inputs['drive_folder'],
         'region': AOI,
-        'scale': 10,
+        # 'scale': 10,
         'maxPixels': 1e9,
         'fileFormat': 'GeoTIFF',
         'formatOptions': {
@@ -147,10 +147,10 @@ if menu['green']:
 
     task1 = ee.batch.Export.image.toDrive(**{
         'image': ndvi_recentannual,
-        'description': f'{city_name_l}_NDVI_Annual',
+        'description': f'{city_name_l}_ndvi_annual',
         'folder': global_inputs['drive_folder'],
         'region': AOI,
-        'scale': 10,
+        # 'scale': 10,
         'maxPixels': 1e9,
         'fileFormat': 'GeoTIFF',
         'formatOptions': {

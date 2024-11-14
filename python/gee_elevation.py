@@ -49,7 +49,7 @@ if menu['elevation']:
     task0 = ee.batch.Export.image.toDrive(**{'image': elevation_clip,
                                              'description': f'{city_name_l}_elevation',
                                              'region': AOI,
-                                             'scale': 30,
+                                            #  'scale': 30,
                                              'folder': global_inputs['drive_folder'],
                                              'maxPixels': 1e9,
                                              'fileFormat': 'GeoTIFF',
