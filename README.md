@@ -10,7 +10,7 @@ First, clone this repository:
 git clone --filter=tree:0 https://github.com/worldbank/crp-lgcrrp.git
 ```
 
-Flood data is proprietary and therefore cannot be directly accessed by this public repository. To include flooding, please request flood data from rsu@worldbank.org. Once received, you will then place it in `mnt/source-data/` so that the resulting file path is `mnt/source-data/fathom/`.
+Flood data is proprietary and therefore cannot be directly accessed by this public repository. To include flooding, please request flood data from bnotkin@worldbank.org. Once received, you will then place it in `mnt/source-data/` so that the resulting file path is `mnt/source-data/fathom/`.
 
 ## To run
 
