@@ -259,10 +259,10 @@ if menu['raster_processing']:
         for lat in lat_tiles_big:
             for lon in lon_tiles_big:
                 file_name = f'{lat}{lon}-{tile_end_matcher(lat)}{tile_end_matcher(lon)}_FABDEM_V1-2.zip'
-                if not exists(global_inputs['elevation_source'] / file_name):
+                if not exists(elev_folder / file_name):
                     print(f'download elevation file: {file_name}')
                     file = requests.get(f'https://data.bris.ac.uk/datasets/s5hqmjcdj8yo2ibzi9b4ew3sn/{file_name}')
-                    open(global_inputs['elevation_source'] / file_name, 'wb').write(file.content)
+                    open(elev_folder / file_name, 'wb').write(file.content)
 
                 # unzip downloads
                 for lat1 in lat_tiles_small:
@@ -270,7 +270,7 @@ if menu['raster_processing']:
                         file_name1 = f'{lat1}{lon1}_FABDEM_V1-2.tif'
                         if not exists(elev_folder / file_name1):
                             try:
-                                with zipfile.ZipFile(global_inputs['elevation_source'] / file_name, 'r') as z:
+                                with zipfile.ZipFile(elev_folder / file_name, 'r') as z:
                                     z.extract(file_name1, elev_folder)
                                     elev_downloaded_files.append(file_name1)
                             except:
@@ -311,7 +311,7 @@ if menu['raster_processing']:
             failed.append(err_msg)
 
             # trigger gee_elevation.py
-            with open('gee_elevation.py') as f:
+            with open('python/gee_elevation.py') as f:
                 exec(f.read())
     
     # Download and prepare demographics data ------------------
