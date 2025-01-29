@@ -259,10 +259,10 @@ if menu['raster_processing']:
         for lat in lat_tiles_big:
             for lon in lon_tiles_big:
                 file_name = f'{lat}{lon}-{tile_end_matcher(lat)}{tile_end_matcher(lon)}_FABDEM_V1-2.zip'
-                if not exists(global_inputs['elevation_source'] / file_name):
+                if not exists(Path(global_inputs['elevation_source']) / file_name):
                     print(f'download elevation file: {file_name}')
                     file = requests.get(f'https://data.bris.ac.uk/datasets/s5hqmjcdj8yo2ibzi9b4ew3sn/{file_name}')
-                    open(global_inputs['elevation_source'] / file_name, 'wb').write(file.content)
+                    open(Path(global_inputs['elevation_source']) / file_name, 'wb').write(file.content)
 
                 # unzip downloads
                 for lat1 in lat_tiles_small:
