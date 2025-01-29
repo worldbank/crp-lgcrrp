@@ -99,7 +99,7 @@ if menu['landcover']:
     task0 = ee.batch.Export.image.toDrive(**{'image': lc_aoi,
                                              'description': f'{city_name_l}_lc',
                                              'region': AOI,
-                                            #  'scale': 10,
+                                             'scale': 10,
                                              'folder': global_inputs['drive_folder'],
                                              'maxPixels': 1e9,
                                              'fileFormat': 'GeoTIFF',

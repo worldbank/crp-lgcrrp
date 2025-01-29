@@ -128,7 +128,7 @@ if menu['winter_lst']:
         'description': f"{city_name_l}_winter",
         'folder': global_inputs['drive_folder'],
         'region': AOI,
-        # 'scale': 30,
+        'scale': 30,
         'maxPixels': 1e9,
         'fileFormat': 'GeoTIFF',
         'formatOptions': {

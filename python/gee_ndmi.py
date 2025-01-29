@@ -120,8 +120,8 @@ if menu['ndmi']:
     # PROCESSING #########################################
     no_data_val = -9999
 
-    s2a_Season = ee.ImageCollection('COPERNICUS/S2').filterBounds(AOI).filter(rangefilter).filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 10)).map(maskS2clouds)
-    S2a_RecentAnnual = ee.ImageCollection('COPERNICUS/S2').filterBounds(AOI).filterDate(NDMI_last_year).filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 10)).map(maskS2clouds)
+    s2a_Season = ee.ImageCollection('COPERNICUS/S2_HARMONIZED').filterBounds(AOI).filter(rangefilter).filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 10)).map(maskS2clouds)
+    S2a_RecentAnnual = ee.ImageCollection('COPERNICUS/S2_HARMONIZED').filterBounds(AOI).filterDate(NDMI_last_year).filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 10)).map(maskS2clouds)
 
     s2a_med_Season = s2a_Season.median().clip(AOI).unmask(value = no_data_val, sameFootprint = False)
     s2a_med_RecentAnnual = S2a_RecentAnnual.median().clip(AOI).unmask(value = no_data_val, sameFootprint = False)
@@ -135,7 +135,7 @@ if menu['ndmi']:
         'description': f'{city_name_l}_ndmi_season',
         'folder': global_inputs['drive_folder'],
         'region': AOI,
-        # 'scale': 10,
+        'scale': 10,
         'maxPixels': 1e9,
         'fileFormat': 'GeoTIFF',
         'formatOptions': {
@@ -150,7 +150,7 @@ if menu['ndmi']:
         'description': f'{city_name_l}_ndmi_annual',
         'folder': global_inputs['drive_folder'],
         'region': AOI,
-        # 'scale': 10,
+        'scale': 10,
         'maxPixels': 1e9,
         'fileFormat': 'GeoTIFF',
         'formatOptions': {

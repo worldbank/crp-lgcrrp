@@ -69,7 +69,7 @@ if menu['nightlight']:
         'description': f'{city_name_l}_linfit',
         'folder': global_inputs['drive_folder'],
         'region': AOI,
-        # 'scale': 100,
+        'scale': 463.83,
         'maxPixels': 1e9,
         'fileFormat': 'GeoTIFF',
         'formatOptions': {
@@ -84,7 +84,7 @@ if menu['nightlight']:
         'description': f'{city_name_l}_avg_rad_sum',
         'folder': global_inputs['drive_folder'],
         'region': AOI,
-        # 'scale': 100,
+        'scale': 463.83,
         'maxPixels': 1e9,
         'fileFormat': 'GeoTIFF',
         'formatOptions': {
