@@ -20,6 +20,7 @@ if menu['landcover']:
         city_inputs = yaml.safe_load(f)
 
     city_name_l = city_inputs['city_name'].replace(' ', '_').replace("'", '').lower()
+    aoi_name = city_inputs['AOI_shp_name']
 
     # load global inputs
     with open("python/global_inputs.yml", 'r') as f:
@@ -35,7 +36,7 @@ if menu['landcover']:
     lc = ee.ImageCollection('ESA/WorldCover/v200').first()
 
     # Read AOI shapefile --------
-    aoi_file = gpd.read_file(f'mnt/city-directories/{city_name_l}/01-user-input/AOI/{city_name_l}.shp').to_crs(epsg = 4326)
+    aoi_file = gpd.read_file(f'mnt/city-directories/{city_name_l}/01-user-input/AOI/{aoi_name}.shp').to_crs(epsg = 4326)
 
     # Convert shapefile to ee.Geometry ------------
     jsonDict = eval(gpd.GeoSeries([aoi_file['geometry'].force_2d().union_all()]).to_json())
