@@ -29,7 +29,7 @@ librarian::shelf(quiet = T,
 
   # Spatial
   sf,
-  terra,
+  rspatial/terra,
   tidyterra, 
   leaflet, 
   ggspatial, 
@@ -45,6 +45,7 @@ librarian::shelf(quiet = T,
   purrr,
   forcats,
   units,
+  matrixStats,
   dplyr)
 
 # 2. Load functions ------------------------------------------------------------

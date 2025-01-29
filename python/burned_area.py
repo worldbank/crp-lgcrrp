@@ -38,7 +38,7 @@ if menu['burned_area']:
 
     # SET PARAMETERS ################################
     # Set data folders --------------
-    gf_folder = f"mnt/source-data/{global_inputs['burned_area_source']}"
+    gf_folder = Path(f"mnt/source-data/{global_inputs['burned_area_source']}")
 
     # Buffer AOI ------------------
     aoi_buff = aoi_file.buffer(1)  # 1 degree is about 111 km at the equator
