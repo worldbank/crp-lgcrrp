@@ -42,6 +42,7 @@ road_network: False
 erosion: False
 water_salinity: False
 soil_salinity: False
+cyclone: False
 
 # stats
 flood_stats: False
