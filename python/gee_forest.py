@@ -17,6 +17,7 @@ if menu['forest']:
         city_inputs = yaml.safe_load(f)
 
     city_name_l = city_inputs['city_name'].replace(' ', '_').replace("'", '').lower()
+    aoi_name = city_inputs['AOI_shp_name']
 
     # load global inputs
     with open("python/global_inputs.yml", 'r') as f:
@@ -28,7 +29,7 @@ if menu['forest']:
     fc = ee.Image("UMD/hansen/global_forest_change_2023_v1_11")
 
     # Read AOI shapefile --------
-    aoi_file = gpd.read_file(f'mnt/city-directories/{city_name_l}/01-user-input/AOI/{city_name_l}.shp').to_crs(epsg = 4326)
+    aoi_file = gpd.read_file(f'mnt/city-directories/{city_name_l}/01-user-input/AOI/{aoi_name}.shp').to_crs(epsg = 4326)
 
     # Convert shapefile to ee.Geometry ------------
     jsonDict = eval(gpd.GeoSeries([aoi_file['geometry'].force_2d().union_all()]).to_json())
@@ -55,7 +56,7 @@ if menu['forest']:
     task0 = ee.batch.Export.image.toDrive(**{'image': forestCover23,
                                              'description': f'{city_name_l}_forest_cover23',
                                              'region': AOI,
-                                            #  'scale': 30,
+                                             'scale': 30.92,
                                              'folder': global_inputs['drive_folder'],
                                              'maxPixels': 1e9,
                                              'fileFormat': 'GeoTIFF',
@@ -68,7 +69,7 @@ if menu['forest']:
     task1 = ee.batch.Export.image.toDrive(**{'image': deforestation_year,
                                              'description': f'{city_name_l}_deforestation',
                                              'region': AOI,
-                                            #  'scale': 30,
+                                             'scale': 30.92,
                                              'folder': global_inputs['drive_folder'],
                                              'maxPixels': 1e9,
                                              'fileFormat': 'GeoTIFF',

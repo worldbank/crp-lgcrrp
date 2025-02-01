@@ -17,6 +17,7 @@ if menu['nightlight']:
         city_inputs = yaml.safe_load(f)
 
     city_name_l = city_inputs['city_name'].replace(' ', '_').replace("'", '').lower()
+    aoi_name = city_inputs['AOI_shp_name']
 
     # load global inputs
     with open("python/global_inputs.yml", 'r') as f:
@@ -28,7 +29,7 @@ if menu['nightlight']:
     viirs = ee.ImageCollection("NOAA/VIIRS/DNB/MONTHLY_V1/VCMSLCFG")
 
     # Read AOI shapefile --------
-    aoi_file = gpd.read_file(f'mnt/city-directories/{city_name_l}/01-user-input/AOI/{city_name_l}.shp').to_crs(epsg = 4326)
+    aoi_file = gpd.read_file(f'mnt/city-directories/{city_name_l}/01-user-input/AOI/{aoi_name}.shp').to_crs(epsg = 4326)
 
     # Convert shapefile to ee.Geometry ------------
     jsonDict = eval(gpd.GeoSeries([aoi_file['geometry'].force_2d().union_all()]).to_json())
@@ -68,7 +69,7 @@ if menu['nightlight']:
         'description': f'{city_name_l}_linfit',
         'folder': global_inputs['drive_folder'],
         'region': AOI,
-        # 'scale': 100,
+        'scale': 463.83,
         'maxPixels': 1e9,
         'fileFormat': 'GeoTIFF',
         'formatOptions': {
@@ -83,7 +84,7 @@ if menu['nightlight']:
         'description': f'{city_name_l}_avg_rad_sum',
         'folder': global_inputs['drive_folder'],
         'region': AOI,
-        # 'scale': 100,
+        'scale': 463.83,
         'maxPixels': 1e9,
         'fileFormat': 'GeoTIFF',
         'formatOptions': {

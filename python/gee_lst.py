@@ -23,6 +23,7 @@ if menu['summer_lst']:
         city_inputs = yaml.safe_load(f)
 
     city_name_l = city_inputs['city_name'].replace(' ', '_').replace("'", '').lower()
+    aoi_name = city_inputs['AOI_shp_name']
 
     # load global inputs
     with open("python/global_inputs.yml", 'r') as f:
@@ -38,7 +39,7 @@ if menu['summer_lst']:
     landsat = ee.ImageCollection("LANDSAT/LC08/C02/T1_L2")
 
     # Read AOI shapefile --------
-    aoi_file = gpd.read_file(f'mnt/city-directories/{city_name_l}/01-user-input/AOI/{city_name_l}.shp').to_crs(epsg = 4326)
+    aoi_file = gpd.read_file(f'mnt/city-directories/{city_name_l}/01-user-input/AOI/{aoi_name}.shp').to_crs(epsg = 4326)
     centroid = aoi_file.centroid
 
     # Convert shapefile to ee.Geometry ------------
@@ -48,7 +49,7 @@ if menu['summer_lst']:
         print('Need to convert polygons into a multipolygon')
         print('or do something else, like creating individual raster for each polygon and then merge')
         exit()
-    
+
     AOI = ee.Geometry.MultiPolygon(jsonDict['features'][0]['geometry']['coordinates'])
 
 
@@ -81,14 +82,14 @@ if menu['summer_lst']:
             # Write each number to the file on a new line
             for number in hottest_months:
                 file.write(f"{number}\n")
-    
+
     else:
         hottest_months = []
         with open(output_folder / f'{city_name_l}_hottest_months.txt') as file:
             for line in file:
                 # Convert each line to an integer and append to the list
                 hottest_months.append(int(line.strip()))
-    
+
     # Date filter -----------------
     def ee_filter_month(month):
         if 1 <= month <= 11:
@@ -97,13 +98,13 @@ if menu['summer_lst']:
             return [ee.Filter.date(f'{year}-12-01', f'{year+1}-01-01') for year in range(global_inputs['first_year'], global_inputs['last_year'] + 1)]
         else:
             return
-    
+
     range_list0 = ee_filter_month(hottest_months[0])
     range_list1 = ee_filter_month(hottest_months[1])
     range_list2 = ee_filter_month(hottest_months[2])
 
     rangefilter = ee.Filter.Or(range_list0 + range_list1 + range_list2)
-    
+
     # Cloud mask function ----------------
     def maskL457sr(image):
         # Bit 0 - Fill
@@ -122,12 +123,14 @@ if menu['summer_lst']:
     # PROCESSING ###############################
     no_data_val = -9999
     collectionSummer = landsat.filter(rangefilter).filterBounds(AOI).map(maskL457sr).select('ST_B10').mean().add(-273.15).clip(AOI).unmask(value = no_data_val, sameFootprint = False)
+    # print(landsat.size().getInfo())  # Check number of images in collection
+    # print(collectionSummer.getInfo())  # Inspect final image properties
     task = ee.batch.Export.image.toDrive(**{
         'image': collectionSummer,
         'description': f"{city_name_l}_summer",
         'folder': global_inputs['drive_folder'],
         'region': AOI,
-        # 'scale': 30,
+        'scale': 30,
         'maxPixels': 1e9,
         'fileFormat': 'GeoTIFF',
         'formatOptions': {
