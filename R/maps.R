@@ -58,6 +58,7 @@ if (inherits(landmarks, "SpatVector")) {
 }
 
 # Standard plots ---------------------------------------------------------------
+print("Standard plots")
 unlist(lapply(layer_params, \(x) x$fuzzy_string)) %>%
   map2(names(.), \(fuzzy_string, yaml_key) {
     tryCatch({
@@ -74,13 +75,16 @@ unlist(lapply(layer_params, \(x) x$fuzzy_string)) %>%
   }) %>% unlist() -> plot_log
 
 # Non-standard plots -----------------------------------------------------------
-# source("R/map-elevation.R")
+print("Non-standard plots")
+source("R/map-elevation.R")
 # source("R/map-deforestation.R")
 source("R/map-flooding.R")
 # source("R/map-historical-burnt-area.R")
 source("R/map-cyclones.R")
+source("R/map-lightning.R")
 
 # Save plots -------------------------------------------------------------------
+print("Saving plots")
 plots %>% walk2(names(.), \(plot, name) {
   save_plot(plot, filename = glue("{name}.png"), directory = styled_maps_dir)
 })
