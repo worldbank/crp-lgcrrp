@@ -82,7 +82,7 @@ source("R/map-flooding.R")
 # source("R/map-historical-burnt-area.R")
 source("R/map-cyclones.R")
 source("R/map-lightning.R")
-source("R/map-water-salinity.R")
+source("R/map-soil-salinity.R")
 
 # Save plots -------------------------------------------------------------------
 print("Saving plots")
