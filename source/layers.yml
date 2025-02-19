@@ -212,15 +212,8 @@ lightning:
 soil_salinity:
   fuzzy_string: soil_salinity_2016
   title: Soil Salinity
-  palette: ['#ECFEDD', 'orangered']
-  breaks: [0, 2, 4, 8, 16, 40]
-  labels: [Non-saline, Slightly, Moderately, Highly, Extremely]
-water_salinity:
   data_variable: Numeric_va
-  title: 'Water salinity'
   factor: TRUE
-  palette: ['#F0F9E8', '#CCEBC5', '#A8DDB5', '#7BCCC4', '#4EB3D3', '#2B8CBE', '#08589E']
-  # labels: ['Non Saline', 'Non saline with some very slightly saline', 'Very slightly saline with some slightly saline', 'Slightly saline with some moderately saline', 'Strongly saline with some moderately saline', 'Sundarban', 'Very Strongly saline with some moderately saline']
+  palette: ['#ECFEDD', '#ECDBB8', '#EDB993', '#EE976E', '#EE7449', '#EF5224', '#F03000']
   labels: ['Non Saline', 'Non saline (some very slight)', 'Very slight (some slight)', 'Slight (some moderate)', 'Strong (some moderate)', 'Sundarban', 'Very Strong (some moderate)']
-  # labels: ['Non Saline', 'Non – very slight saline', 'Very slightly – slightly saline', 'Slightly - moderately saline', 'Moderately – strongly saline', 'Sundarban', 'Very Strongly saline with some moderately saline']
   breaks: ['100', '1', '2', '3', '4', '5', '6']
