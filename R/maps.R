@@ -64,6 +64,7 @@ unlist(lapply(layer_params, \(x) x$fuzzy_string)) %>%
   map2(names(.), \(fuzzy_string, yaml_key) {
     tryCatch({
       data <- fuzzy_read(spatial_dir, fuzzy_string) %>% vectorize_if_coarse()
+      if (inherits(data, "SpatVector")) data <- crop(data, aoi)
       plot <- plot_layer(
         data = data, yaml_key = yaml_key,
         plot_wards = !is.null(wards), plot_roads = F)
@@ -81,7 +82,6 @@ source("R/map-elevation.R")
 # source("R/map-deforestation.R")
 source("R/map-flooding.R")
 # source("R/map-historical-burnt-area.R")
-source("R/map-cyclones.R")
 source("R/map-lightning.R")
 source("R/map-soil-salinity.R")
 

@@ -10,12 +10,12 @@
 # }) %>% bind_spat_rows()
 # writeVector(salinity_no_overlap, "mnt/source-data/Soil Salinity/salinity-no-overlap.gpkg")
 
-salinity_data <- vect("mnt/source-data/Soil Salinity/salinity-no-overlap.gpkg")
+salinity_data <- vect("mnt/source-data/Soil Salinity/Salinity.shp")
 
 plot_soil_salinity_regional <- function() {
   p <- plot_layer(salinity_data,
                   yaml_key = "soil_salinity", plot_aoi = T) +
-    coord_3857_bounds(static_map_bounds, expansion = 20)
+    coord_3857_bounds(static_map_bounds, expansion = 10)
   p$layers[detect_index(p$layers, \(x) inherits(x$geom, "GeomMapTile"))] <-
     annotation_map_tile(type = "cartolight", zoom = 9, progress = "none")[1]
   return(p)
