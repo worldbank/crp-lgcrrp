@@ -8,7 +8,7 @@ plot_lightning_regional <- function() {
   p <- plot_layer(
     lightning_data,
     yaml_key = "lightning", plot_aoi = T) + 
-    coord_3857_bounds(expansion = 20)
+    coord_3857_bounds(static_map_bounds, expansion = 20)
   p$layers[detect_index(p$layers, \(x) inherits(x$geom, "GeomMapTile"))] <- 
     annotation_map_tile(type = "cartolight", zoom = 9, progress = "none")[1]
   return(p)

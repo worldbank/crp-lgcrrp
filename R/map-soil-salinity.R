@@ -15,7 +15,7 @@ salinity_data <- vect("mnt/source-data/Soil Salinity/salinity-no-overlap.gpkg")
 plot_soil_salinity_regional <- function() {
   p <- plot_layer(salinity_data,
                   yaml_key = "soil_salinity", plot_aoi = T) +
-    coord_3857_bounds(expansion = 20)
+    coord_3857_bounds(static_map_bounds, expansion = 20)
   p$layers[detect_index(p$layers, \(x) inherits(x$geom, "GeomMapTile"))] <-
     annotation_map_tile(type = "cartolight", zoom = 9, progress = "none")[1]
   return(p)
