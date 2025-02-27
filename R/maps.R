@@ -1,18 +1,21 @@
 # Generating LGCRRP Maps
 
-source("R/setup.R")
-source("R/pre-mapping.R")
-
 # Set static map visualization parameters
 layer_alpha <- 0.7
 map_width <- 6.9
 map_height <- 5.9
 aspect_ratio <- map_width / map_height
+map_portions <- c(3, 1) # First number is map width, second is legend width
+
+# Load libraries and pre-process rasters
+source("R/setup.R", local = T)
+source("R/pre-mapping.R", local = T)
 
 # Define map extent and zoom level
 static_map_bounds <- aspect_buffer(aoi, aspect_ratio, buffer_percent = 0.05)
-zoom <- round(14.6 + -0.00015 * (sqrt(expanse(aoi)))) + 1
-tiles <- annotation_map_tile(type = "cartolight", zoom = zoom, progress = "none")
+zoom_level <- get_zoom_level(static_map_bounds)
+
+# Static maps
 
 # Initiate plots list ----------------------------------------------------------
 plots <- list()
@@ -25,8 +28,6 @@ if(is.null(wards)) {
   plots$aoi <- plot_layer(aoi_only = T, plot_aoi = F, plot_wards = T) +
     # geom_spatvector_text(data = wards, aes(label = as.numeric(str_extract(WARD_NO, "\\d*$"))))
     geom_spatvector_text(data = ward_labels, aes(label = WARD_NO), size = 2, fontface = "bold")
-  save_plot(plot = plots$aoi, filename = "aoi.png",
-            directory = styled_maps_dir)
 }
 
 # Plot landmarks ---------------------------------------------------------------
@@ -58,10 +59,12 @@ if (inherits(landmarks, "SpatVector")) {
 }
 
 # Standard plots ---------------------------------------------------------------
+print("Standard plots")
 unlist(lapply(layer_params, \(x) x$fuzzy_string)) %>%
   map2(names(.), \(fuzzy_string, yaml_key) {
     tryCatch({
       data <- fuzzy_read(spatial_dir, fuzzy_string) %>% vectorize_if_coarse()
+      if (inherits(data, "SpatVector")) data <- crop(data, aoi)
       plot <- plot_layer(
         data = data, yaml_key = yaml_key,
         plot_wards = !is.null(wards), plot_roads = F)
@@ -74,15 +77,19 @@ unlist(lapply(layer_params, \(x) x$fuzzy_string)) %>%
   }) %>% unlist() -> plot_log
 
 # Non-standard plots -----------------------------------------------------------
-# source("R/map-elevation.R")
+print("Non-standard plots")
+source("R/map-elevation.R")
 # source("R/map-deforestation.R")
 source("R/map-flooding.R")
 # source("R/map-historical-burnt-area.R")
-source("R/map-cyclones.R")
+source("R/map-lightning.R")
+source("R/map-soil-salinity.R")
 
 # Save plots -------------------------------------------------------------------
+print("Saving plots")
 plots %>% walk2(names(.), \(plot, name) {
-  save_plot(plot, filename = glue("{name}.png"), directory = styled_maps_dir)
+  save_plot(plot, filename = glue("{name}.png"), directory = styled_maps_dir,
+    map_height = map_height, map_width = map_width, dpi = 200, rel_widths = map_portions)
 })
 
 # See which layers weren't successfully mapped

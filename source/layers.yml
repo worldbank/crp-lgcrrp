@@ -202,9 +202,17 @@ cyclones:
   palette: ['purple', 'yellow']
   breaks: [0, 9, 14, 17, 32, 40]
   labels:  ["0 m/s", 9 m/s (Depression), 14 m/s (Deep depression), 17 m/s (Tropical storm), 32 m/s (Cyclone), ""]
+lightning:
+  fuzzy_string: vhrfc
+  title: Lightning Flash Rate Density
+  subtitle: Mean flashes per square kilometer per year
+  palette: ['#400066', '#F5FAD8']
+  bins: 5
+  # breaks: [0, 20, 40, 60, 80, 100]
 soil_salinity:
-  fuzzy_string: soil_salinity_2016
   title: Soil Salinity
-  palette: ['#ECFEDD', 'orangered']
-  breaks: [0, 2, 4, 8, 16, 40]
-  labels: [Non-saline, Slightly, Moderately, Highly, Extremely]
+  data_variable: Numeric_va
+  factor: TRUE
+  palette: ['#ECFEDD', '#ECD4B0', '#EDAB84', '#EE8258', '#EF592C', '#F03000']
+  labels: ['Non Saline', 'Non saline (some very slight)', 'Very slight (some slight)', 'Slight (some moderate)', 'Strong (some moderate)', 'Very Strong (some moderate)']
+  breaks: ['100', '1', '2', '3', '4', '6']

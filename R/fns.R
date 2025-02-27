@@ -1,6 +1,4 @@
-# Packages ----
-
-# Map Functions ----
+# Map Functions ----------------------------------------------------------------
 fuzzy_read <- function(dir, fuzzy_string, FUN = NULL, path = T, convert_to_vect = F, ...) {
   file <- list.files(dir) %>% str_subset(fuzzy_string) #%>%
   if (length(file) > 1) warning(paste("Too many", fuzzy_string, "files in", dir))
@@ -61,6 +59,8 @@ prepare_parameters <- function(yaml_key, ...) {
   # Apply layer transparency to palette
   params$palette <- sapply(params$palette, \(p) {
     # If palette has no alpha, add
+    layer_alpha <- params$alpha %||% layer_alpha
+    if (p == "transparent") return("#FFFFFF00")
     if (nchar(p) == 7 | substr(p, 1, 1) != "#") return(scales::alpha(p, layer_alpha))
     # If palette already has alpha, multiply
     if (nchar(p) == 9) {
@@ -79,10 +79,14 @@ prepare_parameters <- function(yaml_key, ...) {
   return(params)
 }
 
-plot_layer <- function(data, yaml_key, baseplot = NULL, plot_aoi = T, aoi_only = F, plot_wards = F, plot_roads = F, ...) {
+plot_layer <- function(
+    data, yaml_key, baseplot = NULL, static_map_bounds, zoom_adj = 0,
+    expansion, aoi_stroke = list(color = "grey30", linewidth = 0.4),
+    plot_aoi = T, aoi_only = F, plot_wards = F, plot_roads = F, ...) {
   if (aoi_only) {
     layer <- NULL
   } else { 
+    # Create geom and scales
     params <- prepare_parameters(yaml_key = yaml_key, ...)
     if (!is.null(params$data_variable)) data <- data[params$data_variable]
     if (exists_and_true(params$factor)) {
@@ -110,10 +114,34 @@ plot_layer <- function(data, yaml_key, baseplot = NULL, plot_aoi = T, aoi_only =
     layer <- list(geom = geom, scale = scales, theme = theme)
   }
 
-  baseplot <- if (is.null(baseplot)) {
+  # I should make all these functions into a package and then define city_dir,
+  # map_width, static_map_bounds, etc., as package level variables that get set
+  # with set_.*() variables
+
+  if ("static_map_bounds" %in% ls() && missing(static_map_bounds)) remove(static_map_bounds, inherits = F)
+  if (!exists("static_map_bounds")) {
+    warning(paste("static_map_bounds does not exist. Define one globally or as an",
+      "argument to plot_static_layer. A plot extent will be defined using `aoi`."))
+    if (exists("aoi")) {
+      static_map_bounds <- aspect_buffer(aoi, aspect_ratio, buffer_percent = 0.05)
+  } else stop("No object `aoi` exists.")
+  }
+
+  if (!missing(expansion)) {
+    aspect_ratio <- as.vector(ext(project(static_map_bounds, "epsg:3857"))) %>%
+      { diff(.[1:2])/diff(.[3:4]) }
+    static_map_bounds <- aspect_buffer(static_map_bounds, aspect_ratio, buffer_percent = expansion - 1)
+  }
+
+  # Plot geom and scales on baseplot
+  baseplot <- if (is.null(baseplot) || identical(baseplot, "vector")) {
     ggplot() +
       geom_spatvector(data = static_map_bounds, fill = NA, color = NA) +
-      tiles 
+      annotation_map_tile(type = "cartolight", zoom = get_zoom_level(static_map_bounds) + zoom_adj, progress = "none")
+  } else if (is.character(baseplot)) {
+    ggplot() +
+      geom_spatvector(data = static_map_bounds, fill = NA, color = NA) +
+      annotation_map_tile(type = baseplot, zoom = get_zoom_level(static_map_bounds) + zoom_adj, progress = "none")
   } else { baseplot + ggnewscale::new_scale_fill() }
   p <- baseplot +
     layer + 
@@ -123,13 +151,13 @@ plot_layer <- function(data, yaml_key, baseplot = NULL, plot_aoi = T, aoi_only =
   if (plot_roads) p <- p +
     geom_spatvector(data = roads, aes(linewidth = road_type), color = "white") +
     scale_linewidth_manual(values = c("Secondary" = 0.25, "Primary" = 1), guide = "none")
-  if (plot_aoi) p <- p + geom_spatvector(data = aoi, color = "grey30", fill = NA, linetype = "solid", linewidth = .4)
+  if (plot_aoi) p <- p + geom_spatvector(data = aoi, color = aoi_stroke$color, fill = NA, linetype = "solid", linewidth = aoi_stroke$linewidth)
   if (plot_wards) {
-    p <- p + geom_spatvector(data = wards, color = "grey30", fill = NA, linetype = "solid", linewidth = .25)
+    p <- p + geom_spatvector(data = wards, color = aoi_stroke$color, fill = NA, linetype = "solid", linewidth = .25)
     if (exists("ward_labels")) p <- p +
       geom_spatvector_text(data = ward_labels, aes(label = WARD_NO), size = 2, fontface = "bold")
   }
-  p <- p + coord_3857_bounds()
+  p <- p + coord_3857_bounds(static_map_bounds)
   return(p)
 }
 
@@ -149,7 +177,7 @@ create_geom <- function(data, params) {
   data_type <- type_data(data)
   layer_values <- get_layer_values(data)
   if (data_type == "points") {
-    geom_spatvector(data = data, aes(color = layer_values), size = 1)
+    geom_spatvector(data = data, aes(color = layer_values), size = params$size %||% 1)
   } else if (data_type == "polygons") {
     geom_spatvector(data = data, aes(fill = layer_values), color = params$stroke)
   } else if (data_type == "lines") {
@@ -164,7 +192,7 @@ create_geom <- function(data, params) {
     if (is.null(stroke_variable)) aes_list <- aes_list[-1]
     geom_spatvector(data = data, aes_list)
   } else if (data_type == "raster") {
-    geom_spatraster(data = data)
+    geom_spatraster(data = data, maxcell = 5e6) #, show.legend = T)
   }
 }
 
@@ -196,7 +224,7 @@ fill_scale <- function(data_type, params) {
       values = if (is.null(params$breaks)) NULL else breaks_midpoints(params$breaks, rescaler = if (!is.null(params$center)) scales::rescale_mid else scales::rescale, mid = params$center),
       labels = if (is.null(params$labels)) waiver() else params$labels,
       limits = if (is.null(params$breaks)) NULL else range(params$breaks),
-      rescaler = if (!is.null(params$center)) ~ scales::rescale_mid(.x, mid = params$center) else scales::rescale,
+      rescaler = if (!is.null(params$center)) scales::rescale_mid else scales::rescale,
       na.value = "transparent",
       oob = scales::oob_squish,
       name = format_title(params$title, params$subtitle),
@@ -257,29 +285,45 @@ theme_custom <- function(...) {
   ...)
 }
 
-coord_3857_bounds <- function(..., expansion = 1) {
-  bbox_3857 <- st_bbox(st_transform(static_map_bounds, crs = "epsg:3857"))
+coord_3857_bounds <- function(extent, expansion = 1, ...) {
+  if (!inherits(extent, "SpatExtent")) {
+    if (inherits(extent, "SpatVector")) extent <- ext(project(extent, "epsg:3857"))
+    if (inherits(extent, "sfc")) extent <- ext(vect(st_transform(extent, crs = "epsg:3857")))
+    extent <- ext(extent)
+  }
   coord_sf(
     crs = "epsg:3857",
     expand = F,
-    xlim = bbox_3857[c(1,3)] %>% { (. - mean(.)) * expansion + mean(.)},
-    ylim = bbox_3857[c(2,4)] %>% { (. - mean(.)) * expansion + mean(.)},
+    xlim = extent[1:2] %>% { (. - mean(.)) * expansion + mean(.)},
+    ylim = extent[3:4] %>% { (. - mean(.)) * expansion + mean(.)},
     ...)
 }
 
-save_plot <- function(plot = NULL, filename, directory, rel_widths = c(3, 1)) {
+get_zoom_level <- \(bounds, cap = 10) {
+  # cap & max() is a placeholder. The formula was developed for smaller cities, but calculates 7 for Guiyang which is far too coarse
+  zoom <- round(14.6 + -0.00015 * sqrt(expanse(project(bounds, "epsg:4326"))/3))
+  if (is.na(cap)) return(zoom)
+  max(zoom, cap)
+}
+
+save_plot <- function(
+    plot = NULL, filename, directory,
+    map_height = 5.9, map_width = 6.9, dpi = 300,
+    rel_widths = c(3, 1)) {
+
   # Saves plots with set legend widths
   plot_layout <- plot_grid(
-      plot + theme(legend.position = "none"),
-      # Before ggplot2 3.5 was get_legend(plot); still works but with warning;
-      # there are now multiple guide-boxes
-      get_plot_component(plot, "guide-box-right"),
-      rel_widths = rel_widths,
-      nrow = 1) +
+    plot + theme(legend.position = "none"),
+    # Before ggplot2 3.5 was get_legend(plot); still works but with warning;
+    # there are now multiple guide-boxes
+    get_plot_component(plot, "guide-box-right"),
+    rel_widths = rel_widths,
+    nrow = 1) +
     theme(plot.background = element_rect(fill = "white", colour = NA))
   cowplot::save_plot(
     plot = plot_layout,
     filename = file.path(directory, filename),
+    dpi = dpi,
     base_height = map_height, base_width = sum(rel_widths)/rel_widths[1] * map_width)
 }
 
@@ -312,39 +356,35 @@ breaks_midpoints <- \(breaks, rescaler = scales::rescale, ...) {
   return(midpoints)
 }
 
-aspect_buffer <- function(x, aspect_ratio, buffer_percent = 0) {
-  # I should fully refactor to use terra
-  if (class(x)[1] %in% "SpatVector") x <- st_zm(as_sf(x))
-  bounds_proj <- st_transform(st_as_sfc(st_bbox(x)), crs = "EPSG:3857")
-  center_proj <- st_coordinates(st_centroid(bounds_proj))
+aspect_buffer <- function(x, aspect_ratio, buffer_percent = 0, to_crs = "epsg:3857", keep_crs = T) {
+  if (!inherits(x, c("SpatVector", "SpatRaster"))) {
+    if (inherits(x, "sfc")) x <- vect(x) else stop("Input must be a terra SpatVector object")
+  }
+  
+  from_crs <- crs(x)
+  x <- project(x, y = to_crs)
+  bounds_proj <- ext(x)
+  center_coords <- crds(centroids(vect(bounds_proj)))
+  corners <- vect(matrix(
+    c(bounds_proj$xmin, bounds_proj$ymin,  # bottom left
+      bounds_proj$xmax, bounds_proj$ymin,  # bottom right
+      bounds_proj$xmin, bounds_proj$ymax,  # top left
+      bounds_proj$xmax, bounds_proj$ymax), # top right
+    ncol = 2, byrow = TRUE), crs = to_crs)
 
-  long_distance <-max(c(
-    st_distance(
-      st_point(st_bbox(bounds_proj)[c("xmin", "ymin")]),
-      st_point(st_bbox(bounds_proj)[c("xmax", "ymin")]))[1],
-    st_distance(
-      st_point(st_bbox(bounds_proj)[c("xmin", "ymax")]),
-      st_point(st_bbox(bounds_proj)[c("xmax", "ymax")]))[1]))
-  lat_distance <- max(c(
-    st_distance(
-      st_point(st_bbox(bounds_proj)[c("xmin", "ymin")]),
-      st_point(st_bbox(bounds_proj)[c("xmin", "ymax")]))[1],
-    st_distance(
-      st_point(st_bbox(bounds_proj)[c("xmax", "ymin")]),
-      st_point(st_bbox(bounds_proj)[c("xmax", "ymax")]))[1]))
+  distance_matrix <- as.matrix(distance(corners))
+  x_distance <- max(distance_matrix[1,2], distance_matrix[3,4])
+  y_distance <- max(distance_matrix[1,3], distance_matrix[2,4])
 
-  if (long_distance/lat_distance < aspect_ratio) long_distance <- lat_distance * aspect_ratio
-  if (long_distance/lat_distance > aspect_ratio) lat_distance <- long_distance/aspect_ratio
+  if (x_distance/y_distance < aspect_ratio) x_distance <- y_distance * aspect_ratio
+  if (x_distance/y_distance > aspect_ratio) y_distance <- x_distance/aspect_ratio
 
-  new_bounds_proj <-
-  c(center_proj[,"X"] + (c(xmin = -1, xmax = 1) * long_distance/2 * (1 + buffer_percent)),
-  center_proj[,"Y"] + (c(ymin = -1, ymax = 1) * lat_distance/2 * (1 + buffer_percent)))
-
-  new_bounds <- st_bbox(new_bounds_proj, crs = "EPSG:3857") %>%
-    st_as_sfc() %>%
-    st_transform(crs = st_crs(x))
-
-  return(new_bounds)
+  new_bounds <- terra::ext(
+    x = center_coords[1] + c(-1, 1) * x_distance/2 * (1 + buffer_percent),
+    y = center_coords[2] + c(-1, 1) * y_distance/2 * (1 + buffer_percent))
+  new_bounds <- vect(new_bounds, crs = to_crs)
+  if (!keep_crs) return(new_bounds)
+  project(new_bounds, y = from_crs)
 }
 
 # Alternatively could be two separate functions: pretty_interval() and pretty_quantile()
@@ -556,4 +596,28 @@ theme_cckp_chart <- function(...) {
 annotation_height <- function(x, lower_limit = NULL) {
   if (is.null(lower_limit)) lower_limit <- min(x)
   .95*diff(range(x)) + lower_limit
+}
+
+rotate_ccw <- \(x) t(x)[ncol(x):1,]
+
+density_rast <- \(points, n = 100, aoi = NULL) {
+  crs <- crs(points)
+  data_extent <- ext(points)
+  if (!is.null(aoi)) {
+    data_extent <- terra::union(data_extent, ext(project(aoi, crs)))
+  }
+  density_extent <- ext(aspect_buffer(vect(data_extent, crs = crs), aspect_ratio = aspect_ratio))
+  points_df <- as_tibble(mutate(points, x = geom(points, df = T)$x, y = geom(points, df = T)$y))
+  density <-  MASS::kde2d(points_df$x, points_df$y, n = n, lims = as.vector(density_extent))
+  dimnames(density$z) <- list(x = density$x, y = density$y)
+  # Rotate density, because top left is lowest x and lowest y, instead of lowest x and highest y
+  density$z <- rotate_ccw(density$z)
+  rast(scales::rescale((density$z)), crs = crs, extent = density_extent)
+}
+
+tryCatch_named <- \(name, expr) {
+  tryCatch(expr, error = \(e) {
+    message(paste("Failure:", name))
+    warning(glue("Error on {name}: {e}"))
+  })
 }

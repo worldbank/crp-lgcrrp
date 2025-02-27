@@ -1,7 +1,7 @@
 # Plotting flooding time series line chart
-flood_types <- c("fluvial", "pluvial", "coastal", "combined")
 flood_exposure <- fuzzy_read(tabular_dir, "flood_exposure", read_csv)
-if (!is.na(flood_exposure)) {
+if (inherits(flood_exposure, "data.frame")) {
+  flood_types <- c("fluvial", "pluvial", "coastal", "combined")
   flood_exposure <- flood_exposure %>% 
     select(-ends_with("pct")) %>%
     pivot_longer(cols = any_of(c("fluvial", "pluvial", "coastal", "combined")), names_to = "type", values_to = "area")
