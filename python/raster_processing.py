@@ -229,90 +229,91 @@ if menu['raster_processing']:
 
     # Download and prepare FABDEM data ---------------------
     if menu['elevation'] or menu['slope']:
-        print('download and prepare elevation')
-
         elev_folder = data_folder / 'elev'
+        
+        if not exists(elev_folder / f'{city_name_l}_elevation.tif'):
+            print('download and prepare elevation')
 
-        os.makedirs(elev_folder, exist_ok=True)
+            os.makedirs(elev_folder, exist_ok=True)
 
-        aoi_bounds = aoi_file.bounds
+            aoi_bounds = aoi_file.bounds
 
-        lat_tiles_big = tile_finder('lat', 10)
-        lon_tiles_big = tile_finder('lon', 10)
-        lat_tiles_small = tile_finder('lat', 1)
-        lon_tiles_small = tile_finder('lon', 1)
+            lat_tiles_big = tile_finder('lat', 10)
+            lon_tiles_big = tile_finder('lon', 10)
+            lat_tiles_small = tile_finder('lat', 1)
+            lon_tiles_small = tile_finder('lon', 1)
 
-        def tile_end_matcher(tile_starter):
-            if tile_starter == 'S10':
-                return 'N00'
-            elif tile_starter == 'W010':
-                return 'E000'
-            elif tile_starter[0] == 'N' or tile_starter[0] == 'E':
-                return f'{tile_starter[0]}{str(int(tile_starter[1:]) + 10).zfill(len(tile_starter) - 1)}'
-            elif tile_starter[0] == 'S' or tile_starter[0] == 'W':
-                return f'{tile_starter[0]}{str(int(tile_starter[1:]) - 10).zfill(len(tile_starter) - 1)}'
+            def tile_end_matcher(tile_starter):
+                if tile_starter == 'S10':
+                    return 'N00'
+                elif tile_starter == 'W010':
+                    return 'E000'
+                elif tile_starter[0] == 'N' or tile_starter[0] == 'E':
+                    return f'{tile_starter[0]}{str(int(tile_starter[1:]) + 10).zfill(len(tile_starter) - 1)}'
+                elif tile_starter[0] == 'S' or tile_starter[0] == 'W':
+                    return f'{tile_starter[0]}{str(int(tile_starter[1:]) - 10).zfill(len(tile_starter) - 1)}'
+                else:
+                    print('tile_end_matcher function error')
+                    print('Invalid input. How did this happen?')
+
+            elev_downloaded_files = []
+            for lat in lat_tiles_big:
+                for lon in lon_tiles_big:
+                    file_name = f'{lat}{lon}-{tile_end_matcher(lat)}{tile_end_matcher(lon)}_FABDEM_V1-2.zip'
+                    if not exists(elev_folder / file_name):
+                        print(f'download elevation file: {file_name}')
+                        file = requests.get(f'https://data.bris.ac.uk/datasets/s5hqmjcdj8yo2ibzi9b4ew3sn/{file_name}')
+                        open(elev_folder / file_name, 'wb').write(file.content)
+
+                    # unzip downloads
+                    for lat1 in lat_tiles_small:
+                        for lon1 in lon_tiles_small:
+                            file_name1 = f'{lat1}{lon1}_FABDEM_V1-2.tif'
+                            if not exists(elev_folder / file_name1):
+                                try:
+                                    with zipfile.ZipFile(elev_folder / file_name, 'r') as z:
+                                        z.extract(file_name1, elev_folder)
+                                        elev_downloaded_files.append(file_name1)
+                                except:
+                                    pass
+
+            if len(elev_downloaded_files) > 1:
+                try:
+                    raster_to_mosaic = []
+                    mosaic_file = f'{city_name_l}_elevation.tif'
+
+                    if not exists(elev_folder / mosaic_file):
+                        for p in elev_downloaded_files:
+                            raster = rasterio.open(elev_folder / p)
+                            raster_to_mosaic.append(raster)
+
+                        mosaic, output = merge(raster_to_mosaic)
+                        output_meta = raster.meta.copy()
+                        output_meta.update(
+                            {"driver": "GTiff",
+                            "height": mosaic.shape[1],
+                            "width": mosaic.shape[2],
+                            "transform": output,
+                            }
+                        )
+
+                        with rasterio.open(elev_folder / mosaic_file, 'w', **output_meta) as m:
+                            m.write(mosaic)
+                except MemoryError:
+                    err_msg = 'MemoryError when merging elevation raster files.'
+                    print(err_msg)
+                    print('Try GIS instead for merging.')
+                    failed.append(err_msg)
+            elif len(elev_downloaded_files) == 1:
+                os.replace(elev_folder / elev_downloaded_files[0], elev_folder / f'{city_name_l}_elevation.tif')
             else:
-                print('tile_end_matcher function error')
-                print('Invalid input. How did this happen?')
-
-        elev_downloaded_files = []
-        for lat in lat_tiles_big:
-            for lon in lon_tiles_big:
-                file_name = f'{lat}{lon}-{tile_end_matcher(lat)}{tile_end_matcher(lon)}_FABDEM_V1-2.zip'
-                if not exists(elev_folder / file_name):
-                    print(f'download elevation file: {file_name}')
-                    file = requests.get(f'https://data.bris.ac.uk/datasets/s5hqmjcdj8yo2ibzi9b4ew3sn/{file_name}')
-                    open(elev_folder / file_name, 'wb').write(file.content)
-
-                # unzip downloads
-                for lat1 in lat_tiles_small:
-                    for lon1 in lon_tiles_small:
-                        file_name1 = f'{lat1}{lon1}_FABDEM_V1-2.tif'
-                        if not exists(elev_folder / file_name1):
-                            try:
-                                with zipfile.ZipFile(elev_folder / file_name, 'r') as z:
-                                    z.extract(file_name1, elev_folder)
-                                    elev_downloaded_files.append(file_name1)
-                            except:
-                                pass
-
-        if len(elev_downloaded_files) > 1:
-            try:
-                raster_to_mosaic = []
-                mosaic_file = f'{city_name_l}_elevation.tif'
-
-                if not exists(elev_folder / mosaic_file):
-                    for p in elev_downloaded_files:
-                        raster = rasterio.open(elev_folder / p)
-                        raster_to_mosaic.append(raster)
-
-                    mosaic, output = merge(raster_to_mosaic)
-                    output_meta = raster.meta.copy()
-                    output_meta.update(
-                        {"driver": "GTiff",
-                         "height": mosaic.shape[1],
-                         "width": mosaic.shape[2],
-                         "transform": output,
-                        }
-                    )
-
-                    with rasterio.open(elev_folder / mosaic_file, 'w', **output_meta) as m:
-                        m.write(mosaic)
-            except MemoryError:
-                err_msg = 'MemoryError when merging elevation raster files.'
+                err_msg = 'No elevation file available; use SRTM instead for elevation'
                 print(err_msg)
-                print('Try GIS instead for merging.')
                 failed.append(err_msg)
-        elif len(elev_downloaded_files) == 1:
-            os.replace(elev_folder / elev_downloaded_files[0], elev_folder / f'{city_name_l}_elevation.tif')
-        else:
-            err_msg = 'No elevation file available; use SRTM instead for elevation'
-            print(err_msg)
-            failed.append(err_msg)
 
-            # trigger gee_elevation.py
-            with open('python/gee_elevation.py') as f:
-                exec(f.read())
+                # trigger gee_elevation.py
+                with open('python/gee_elevation.py') as f:
+                    exec(f.read())
     
     # Download and prepare demographics data ------------------
     if menu['demographics']:
