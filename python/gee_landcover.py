@@ -88,10 +88,10 @@ if menu['landcover']:
 
     # Write the counts dictionary to a CSV file
     with open(output_folder / f'{city_name_l}_lc.csv', 'w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=['Land Cover Type', 'Pixel Count'])
+        writer = csv.DictWriter(csvfile, fieldnames=['Land Cover Type', 'Pixel Count', 'Area sq km'])
         writer.writeheader()
         for class_name, count in counts_dict.items():
-            writer.writerow({'Land Cover Type': class_name, 'Pixel Count': count})
+            writer.writerow({'Land Cover Type': class_name, 'Pixel Count': count, 'Area sq km': count * 100 / 1e6})
 
     # Export results to Google Cloud Storage bucket ------------------
     no_data_val = -9999
